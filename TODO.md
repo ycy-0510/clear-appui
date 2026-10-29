@@ -180,8 +180,9 @@
 - [x] README 改為 Clear AppUI 自有介紹，提供 GitHub dependency、Preview 與示範操作。
 - [x] Repo 連結、套件介紹與範例顯示名稱同步更新；Dart 識別仍為 `fossui`。
 - [x] 套件安裝採 GitHub，設定 `publish_to: none`。
-- [ ] 將目前開發成果以保留歷史的方式推送至新 repo 的 `main`。
-- [ ] 用獨立專案從 GitHub 解析依賴，驗證 README 安裝及公開 API 範例。
+- [x] 將目前開發成果以保留歷史的方式推送至新 repo 的 `main`。
+- [x] 獨立專案依 README 從 GitHub 安裝，實際解析 `4b1abd1`；直接擷取公開 API 範例執行 analyze，無問題。
+- [x] 改名後的範例入口測試通過；macOS hot reload 成功，runtime errors 為零；兩份 Info.plist 與 README 本地連結檢查通過。
 - [ ] GitHub Actions workflow 更新：本機 `codex/fork-setup` 保留修改；目前 GitHub CLI 憑證缺少 `workflow` scope，遠端先保留原流程。
 - [ ] 通用 Agent Skill：先讀真實 API、重用現成元件，再套用 HIG 與共用 theme。
 - [ ] Skill 與套件版本配對、依賴檢查及 bootstrap／doctor。
