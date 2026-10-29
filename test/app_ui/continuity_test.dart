@@ -193,6 +193,59 @@ void main() {
     },
   );
 
+  testWidgets('keyboard dismissal fades chrome and disables it immediately', (
+    tester,
+  ) async {
+    late StateSetter change;
+    var keyboard = false;
+    var taps = 0;
+    await tester.pumpWidget(
+      host(
+        StatefulBuilder(
+          builder: (context, update) {
+            change = update;
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                viewInsets: EdgeInsets.only(bottom: keyboard ? 300 : 0),
+              ),
+              child: AppScaffold(
+                body: const SizedBox(),
+                navigation: AppNavigationBar(
+                  items: items,
+                  selectedIndex: 0,
+                  haptic: false,
+                  onSelected: (_) => taps++,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    change(() => keyboard = true);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 70));
+    expect(find.byType(AppNavigationBar), findsOneWidget);
+    final fade = tester.widget<FadeTransition>(
+      find
+          .ancestor(
+            of: find.byType(AppNavigationBar),
+            matching: find.byType(FadeTransition),
+          )
+          .first,
+    );
+    expect(fade.opacity.value, greaterThan(0));
+    expect(fade.opacity.value, lessThan(1));
+    expect(find.text('B').hitTestable(), findsNothing);
+    expect(taps, 0);
+    await tester.pumpAndSettle();
+    expect(find.byType(AppNavigationBar), findsNothing);
+    change(() => keyboard = false);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('B'));
+    expect(taps, 1);
+  });
+
   testWidgets(
     'rapid destination changes retain state and exclude outgoing semantics',
     (tester) async {

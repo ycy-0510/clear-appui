@@ -225,6 +225,6 @@
 - [x] AppScaffold 底部 viewport 延伸到裝置邊緣，尾端 scroll padding 避開導航與系統 inset。
 - [x] AppListGroup／AppSliverListGroup：只有群組外緣圓角，中間平直、分隔線、lazy rows。
 - [x] Skill／文件要求保留原版 navigation、設定入口、搜尋模式與捲動範圍，HIG 不當成 iOS 皮膚。
-- [x] AppUI 38 項測試通過，含動畫中間影格／反向、RTL、Reduce Motion、鍵盤／取消、底部避讓、群組與 lazy scrolling；兩張 CI 視覺圖已更新及檢視。
+- [x] AppUI 39 項測試通過，含鍵盤導航淡出／回復、動畫中間影格／反向、RTL、Reduce Motion、鍵盤／取消、底部避讓、群組與 lazy scrolling；兩張 CI 視覺圖已更新及檢視。
 - [ ] 完成消費端升級與 NPX Skill 重新安裝後的 doctor／預覽驗證。
 - [ ] 新版實機動畫、VoiceOver 與效能驗收；不以 Widget tests／Preview 取代。

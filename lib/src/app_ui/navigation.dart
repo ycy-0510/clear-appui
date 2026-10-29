@@ -193,16 +193,17 @@ class AppScaffold extends StatelessWidget {
         : media.viewInsets.bottom > 0
         ? 0.0
         : media.padding.bottom;
+    final keyboard = media.viewInsets.bottom > 0;
     return ColoredBox(
       color: theme.tokens.colors.background,
       child: SafeArea(
         bottom: false,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Column(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+              child: Column(
                 children: [
                   ?topBar,
                   Expanded(
@@ -218,15 +219,48 @@ class AppScaffold extends StatelessWidget {
                   ),
                 ],
               ),
-              if (navigation != null && media.viewInsets.bottom == 0)
-                Positioned(
-                  bottom: media.padding.bottom + theme.tokens.spacing(3),
-                  left: theme.tokens.spacing(4),
-                  right: theme.tokens.spacing(4),
-                  child: navigation!,
+            ),
+            if (navigation != null)
+              Positioned(
+                bottom: media.padding.bottom + theme.tokens.spacing(3),
+                left: theme.tokens.spacing(4),
+                right: theme.tokens.spacing(4),
+                child: IgnorePointer(
+                  ignoring: keyboard,
+                  child: ExcludeFocus(
+                    excluding: keyboard,
+                    child: ExcludeSemantics(
+                      excluding: keyboard,
+                      child: AnimatedSwitcher(
+                        duration: context.appMotion(
+                          theme.tokens.motion.overlay,
+                        ),
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeInCubic,
+                        transitionBuilder: (child, animation) => FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0, 0.15),
+                              end: Offset.zero,
+                            ).animate(animation),
+                            child: child,
+                          ),
+                        ),
+                        child: keyboard
+                            ? const SizedBox.shrink(
+                                key: ValueKey('navigation-hidden'),
+                              )
+                            : KeyedSubtree(
+                                key: const ValueKey('navigation-visible'),
+                                child: navigation!,
+                              ),
+                      ),
+                    ),
+                  ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );

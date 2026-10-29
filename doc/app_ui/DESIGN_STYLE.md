@@ -68,7 +68,8 @@ work, avoiding flashes for quick local actions. Activation never waits for motio
 
 AppNavigationBar owns one persistent selection surface. It slides and resizes
 instead of toggling separate selected backgrounds. AppTopBar groups and bottom
-chrome animate geometry changes. Rapid changes retarget the current animation.
+chrome animate geometry changes. Keyboard visibility fades navigation out/in
+while immediately disabling hidden controls. Rapid changes retarget motion.
 AppNavigationBody crossfades stable destinations and excludes outgoing pages
 from input, focus and semantics. Reduce Motion lays out final geometry directly.
 
