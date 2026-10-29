@@ -261,5 +261,6 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] 首拖根因：滿高不透明狀態轉毛玻璃時，條件式新增 BackdropFilter 會銷毀手勢 subtree。改為固定 filter、切換 enabled。
 - [x] 同一次把手／內容下拉可改變高度並關閉；取消仍可繼續操作。
 - [x] AppUI 54 項測試通過，包含 6 項新增 Sheet 連續性測試與更新後的明暗 Golden；已檢視兩張圖片。
-- [ ] 嚴格 analyze、消費端／Skill 升級及互動 Preview 驗證。
+- [x] 嚴格 analyze 通過；BIOCAB 升級至 eb6429fc，45 項測試通過；repo-level Skill doctor 確認 contract 1 與 package bytes 一致。
+- [x] 互動 Preview 驗證白底與 Sheet 第一次連續把手下拉關閉；hot restart 6,758ms 後 refresh，新 session 操作無 console error。SDK discovery cache 暫時恢復，未宣稱 SDK 問題已修復。
 - [ ] 新版實機手勢／VoiceOver／效能驗收。
