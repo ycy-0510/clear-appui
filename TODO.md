@@ -211,4 +211,4 @@
 - [x] 產品 type scale、16pt card padding 與設計規則集中於 AppTheme／DESIGN_STYLE。
 - [x] 更新 portable Skill 與 doctor 的設計文件來源。
 - [x] AppUI 26 項通過，涵蓋分組、RTL、觸控／鍵盤／取消與窄版；兩張產品 Golden 已更新並重跑通過。
-- [ ] 發布 Git 修訂、重新安裝消費端 Skill，驗證 package 與 Skill 匹配。
+- [x] 發布 Git 修訂 `324b24b`、透過 NPX 重新安裝 BIOCAB Skill；doctor 確認完全匹配。
