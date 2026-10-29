@@ -270,4 +270,6 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] 上游 FossUI 已有 secondary 淡色填滿；AppListGroup／AppSliverListGroup 已有連續列與外側圓角。
 - [x] 本次 AppCard 與兩種 list group 共用 secondary-over-card 的不透明底色，恢復淡灰分組層次；頁面保持白底。
 - [x] 更新設計文件及 portable Skill，避免把去除品牌染色誤解成移除分組底色。
-- [ ] Golden／靜態分析、消費端與 Skill 升級、互動明暗預覽驗證。
+- [x] 54 項 AppUI 測試、明暗 Golden 與嚴格分析通過；兩張基準圖已檢視。
+- [x] BIOCAB 採用 7f0b080，45 項測試與分析通過；NPX 更新 repo-level Skill，doctor 確認一致。
+- [x] 互動 Preview 確認白底上的灰色 card／list group、捲動中間列及專用 dark preview；hot restart 1,033ms 後 SDK disposed view assertion，refresh 後新 session 操作無 error，未宣稱 SDK 問題已修復。
