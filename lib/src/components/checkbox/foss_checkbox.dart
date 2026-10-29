@@ -271,10 +271,9 @@ class _FossCheckboxControlState extends State<_FossCheckboxControl> {
 
   // The card supplies its own padded surface. A standalone checkbox floors its
   // box to a full tap target on both axes (the [Align] keeps the box tight); a
-  // grouped item hugs its content so a stacked group reads tight, matching the
-  // reference.
+  // grouped options need the same real target instead of a label-height row.
   Widget _hitArea(Widget option) {
-    if (widget.card || !widget.standalone) return option;
+    if (widget.card) return option;
     return ConstrainedBox(
       constraints: const BoxConstraints(
         minHeight: _minTapTarget,

@@ -476,30 +476,30 @@ class _IconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The glyph keeps its small visual footprint while an OverflowBox grows the
-    // hit region to the minimum touch target without inflating the field.
-    // HitTestBehavior.opaque makes the whole region tappable.
+    // The layout must reserve the promised target. Overflow outside a small
+    // parent paints larger but cannot receive taps beyond that parent's bounds.
     return Semantics(
       button: true,
       label: label,
       enabled: onTap != null,
-      child: SizedBox.square(
-        dimension: size,
-        child: OverflowBox(
-          maxWidth: _minHitTarget,
-          maxHeight: _minHitTarget,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: onTap,
-            child: MouseRegion(
-              cursor: onTap == null
-                  ? SystemMouseCursors.basic
-                  : SystemMouseCursors.click,
-              child: Center(
-                child: CustomPaint(
-                  size: Size.square(size),
-                  painter: painter,
-                ),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: MouseRegion(
+          cursor: onTap == null
+              ? SystemMouseCursors.basic
+              : SystemMouseCursors.click,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: _minHitTarget,
+              minHeight: _minHitTarget,
+            ),
+            child: Center(
+              widthFactor: 1,
+              heightFactor: 1,
+              child: CustomPaint(
+                size: Size.square(size),
+                painter: painter,
               ),
             ),
           ),

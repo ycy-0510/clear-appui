@@ -1,12 +1,13 @@
 name: fossui
 description: >-
-  The Fresh, Minimal Flutter UI kit, 39 components. No app shell required.
-  Inspired by coss.com/ui, Cal.com's design system.
+  Clear AppUI: a Flutter product UI library built on FossUI, with shared themes,
+  adaptive layouts, coordinated sheets and drag-and-drop.
 version: 0.1.2
-homepage: https://fossui.org
-repository: https://github.com/fossui/fossui
-issue_tracker: https://github.com/fossui/fossui/issues
-documentation: https://fossui.org/docs
+publish_to: none
+homepage: https://github.com/ycy-0510/clear-appui
+repository: https://github.com/ycy-0510/clear-appui
+issue_tracker: https://github.com/ycy-0510/clear-appui/issues
+documentation: https://github.com/ycy-0510/clear-appui/blob/main/doc/app_ui/DEVELOPMENT.md
 
 topics:
   - ui

@@ -10,6 +10,7 @@ pubspec.lock
 
 # fvm (keep .fvmrc, ignore the local SDK cache/symlink)
 .fvm/
+.widget_preview/
 
 # IDEs
 .idea/

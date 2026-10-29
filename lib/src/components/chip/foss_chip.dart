@@ -34,10 +34,10 @@ enum FossChipVariant {
 
 /// The size of a [FossChip].
 enum FossChipSize {
-  /// Compact: 24 logical pixels tall, sized to sit inside a field.
+  /// Compact display: 24 pixels tall; interactive targets reserve 48 pixels.
   sm,
 
-  /// Default: 32 logical pixels tall, matching a small button.
+  /// Default display: 32 pixels tall; removable chips reserve a real target.
   md,
 }
 
@@ -206,6 +206,7 @@ class _FossChipState extends State<FossChip> {
           ),
         },
         child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: _toggle,
           // A selectable body is a tap target in its own right, so it floors at
           // the minimum. An inert body keeps its exact box, which is what lets
@@ -387,29 +388,28 @@ class _RemoveButtonState extends State<_RemoveButton> {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: widget.enabled ? widget.onRemove : null,
-          child: Padding(
-            padding: widget.padding,
-            child: CustomPaint(
-              foregroundPainter: _focused
-                  ? _FocusRingPainter(
-                      color: widget.ring,
-                      offsetColor: widget.ringOffset,
-                      radius: widget.radius,
-                    )
-                  : null,
-              // Compact glyph footprint, hit region grown to the minimum touch
-              // target so the small mark is comfortably tappable. The overflow
-              // keeps that growth out of the chip's layout.
-              child: SizedBox.square(
-                dimension: _removeGlyphSize,
-                child: OverflowBox(
-                  maxWidth: _minTapTarget,
-                  maxHeight: _minTapTarget,
-                  child: Center(
-                    child: CustomPaint(
-                      size: const Size.square(_removeGlyphSize),
-                      painter: CloseGlyph(color),
-                    ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: _minTapTarget,
+              minHeight: _minTapTarget,
+            ),
+            child: Padding(
+              padding: widget.padding,
+              child: CustomPaint(
+                foregroundPainter: _focused
+                    ? _FocusRingPainter(
+                        color: widget.ring,
+                        offsetColor: widget.ringOffset,
+                        radius: widget.radius,
+                      )
+                    : null,
+                // Layout reserves the target; paint overflow cannot enlarge it.
+                child: Center(
+                  widthFactor: 1,
+                  heightFactor: 1,
+                  child: CustomPaint(
+                    size: const Size.square(_removeGlyphSize),
+                    painter: CloseGlyph(color),
                   ),
                 ),
               ),

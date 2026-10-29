@@ -1,9 +1,9 @@
 part of 'foss_tabs.dart';
 
 // Fixed tab geometry, the mobile base values, not the desktop step. Vertical
-// padding plus the label line height sums to the 36 tab height, so the tab
+// padding plus the label line height sums to the 44 tab height, so the tab
 // grows with the text under a larger scale instead of clipping.
-const double _tabHeight = 36;
+const double _tabHeight = 44;
 const double _tabPadX = 10;
 const double _tabPadY = (_tabHeight - 24) / 2;
 const double _iconSize = 18;
@@ -74,13 +74,22 @@ class _TabButton extends StatelessWidget {
             data: IconThemeData(size: _iconSize, color: textColor),
             child: ExcludeSemantics(child: icon),
           ),
-        Text(
-          label,
-          maxLines: 1,
-          softWrap: false,
-          overflow: TextOverflow.clip,
-          style: visuals.labelStyle.copyWith(color: textColor),
-        ),
+        if (horizontal)
+          Text(
+            label,
+            maxLines: 1,
+            softWrap: false,
+            style: visuals.labelStyle.copyWith(color: textColor),
+          )
+        else
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: visuals.labelStyle.copyWith(color: textColor),
+            ),
+          ),
       ],
     );
 

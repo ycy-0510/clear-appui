@@ -1,5 +1,3 @@
-import 'dart:async' show unawaited;
-
 import 'package:flutter/services.dart'
     show
         AutofillHints,
@@ -157,6 +155,7 @@ class _FossOtpFieldState extends State<FossOtpField>
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
   late final AnimationController _blink;
+  final _slotKeys = <int, GlobalKey>{};
 
   // The last text seen, so [onChanged] fires only on a real value change, not
   // on a caret move, and a controlled write does not echo back.
@@ -309,11 +308,20 @@ class _FossOtpFieldState extends State<FossOtpField>
     final text = _controller.text;
     final active = _activeIndex();
     final separators = _separatorAfter();
+    if (active != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final slotContext = _slotKeys[active]?.currentContext;
+        if (slotContext != null) {
+          Scrollable.ensureVisible(slotContext);
+        }
+      });
+    }
 
     // The caret blinks only while a slot is active; an idle field schedules no
     // frames, and reduced motion holds the caret steady.
     if (active != null && !reduceMotion) {
-      if (!_blink.isAnimating) unawaited(_blink.repeat(reverse: true));
+      if (!_blink.isAnimating) _blink.repeat(reverse: true);
     } else {
       if (_blink.isAnimating) _blink.stop();
       _blink.value = 1;
@@ -323,6 +331,7 @@ class _FossOtpFieldState extends State<FossOtpField>
     for (var i = 0; i < widget.length; i++) {
       row.add(
         _OtpSlot(
+          key: _slotKeys.putIfAbsent(i, GlobalKey.new),
           character: i < text.length ? text[i] : null,
           active: i == active,
           error: widget.error,
@@ -383,10 +392,13 @@ class _FossOtpFieldState extends State<FossOtpField>
               children: [
                 Positioned.fill(child: editable),
                 ExcludeSemantics(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: v.gap * scale,
-                    children: row,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: v.gap * scale,
+                      children: row,
+                    ),
                   ),
                 ),
               ],
@@ -411,6 +423,7 @@ class _OtpSlot extends StatelessWidget {
     required this.blink,
     required this.visuals,
     required this.colors,
+    super.key,
   });
 
   final String? character;

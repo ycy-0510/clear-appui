@@ -180,7 +180,7 @@ class FossBadge extends StatelessWidget {
     final pill = DefaultTextStyle.merge(
       style: labelStyle,
       softWrap: false,
-      overflow: TextOverflow.clip,
+      overflow: TextOverflow.ellipsis,
       maxLines: 1,
       child: DecoratedBox(
         decoration: ShapeDecoration(
@@ -203,7 +203,7 @@ class FossBadge extends StatelessWidget {
               spacing: theme.spacing(1),
               children: [
                 if (leading case final leading?) _icon(leading, foreground),
-                label,
+                Flexible(child: label),
                 if (trailing case final trailing?) _icon(trailing, foreground),
               ],
             ),

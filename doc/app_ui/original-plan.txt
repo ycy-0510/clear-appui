@@ -1,0 +1,1663 @@
+Flutter Custom UI Library — 完整製作計畫
+
+1. 專案目標
+
+1.1 核心目標
+
+建立一套專為產品開發設計的 Flutter UI Library，統一管理：
+
+* 視覺設計與 Design Tokens。
+* 基礎 UI Components。
+* Sheet、Popover、Overlay、Drag and Drop 等複雜互動。
+* 手機、平板、桌面與折疊裝置的 Adaptive Layout。
+* iOS 與 Android 的平台能力差異。
+* 動畫、手勢、觸覺回饋與轉場。
+* 無障礙、鍵盤操作、測試與 AI 輔助開發規範。
+
+目標不是把 iOS 原生介面逐一複製到 Flutter，而是建立一套視覺一致、操作自然、能適應不同螢幕與輸入方式的跨平台設計系統。
+
+1.2 設計原則
+
+1. Flutter-first： 優先使用 Flutter 的 Widgets、Layout、Animation、Overlay 與 Gesture 系統。
+2. Design System owned： 視覺風格、元件 API、互動規則由自己的 Library 控制。
+3. Adaptive by default： 大部分元件自動適應可用空間，不要求每個頁面手動判斷裝置。
+4. Explicit override： 特殊頁面可以手動指定尺寸、版面模式與行為。
+5. Platform-aware： 需要原生能力時使用 Plugin 或 Platform Channel。
+6. Composable： 元件可以組合，不應受到不必要的父子元件限制。
+7. Testable： 所有重要互動都有可重現的自動化測試。
+8. AI-friendly： 使用明確的 API、設計 Token、專案規則與範例，減少 AI 產生不一致實作的機會。
+9. Accessible： 不只考慮觸控操作，也考慮鍵盤、螢幕閱讀器、動態字體與減少動態效果。
+10. Incremental development： 先建立核心架構，再逐步加入複雜互動，避免一次建立過度龐大的框架。
+
+⸻
+
+2. 整體架構
+
+2.1 四個主要層級
+
+Product Features
+       |
+       v
+App UI Components
+       |
+       +-- Foundation Components
+       +-- Layout Components
+       +-- Interaction Components
+       +-- Navigation Components
+       +-- Feedback Components
+       |
+       v
+UI Engines
+       |
+       +-- Adaptive Layout Engine
+       +-- Gesture Coordination
+       +-- Drag and Drop Coordinator
+       +-- Overlay and Presentation Manager
+       +-- Animation System
+       |
+       v
+Flutter Foundation + Platform Adapters
+       |
+       +-- Flutter Widgets / Rendering / Gestures
+       +-- iOS Platform Adapter
+       +-- Android Platform Adapter
+       +-- Foldable Device Adapter
+
+Foundation
+
+管理顏色、字體、間距、尺寸、圓角、動畫、主題與設計規範。
+
+Components
+
+提供可以直接用在產品頁面的 Button、Card、TextField、Sheet、Picker、Navigation 等元件。
+
+UI Engines
+
+處理跨元件行為，例如 Sheet 和列表的手勢衝突、拖曳跨越 Overlay、版面自適應，以及統一的呈現與關閉機制。
+
+Platform Adapters
+
+將需要作業系統能力的功能包裝成統一介面，避免產品元件直接依賴 Swift、Kotlin 或特定 Plugin。
+
+2.2 核心依賴原則
+
+* Foundation 不依賴產品頁面。
+* 基礎 Components 不依賴特定產品功能。
+* Interaction Engines 可以使用 Foundation 和 Flutter 基礎能力。
+* Platform Adapters 不負責決定產品視覺。
+* Product Features 只使用公開的 App* API。
+* 不允許產品頁面任意混用多套 UI Library。
+* 不應讓每個元件自行實作一套 Sheet、Overlay 或拖曳管理系統。
+
+⸻
+
+3. Repository 與目錄規劃
+
+初期建議放在產品 App 的同一個 Repository。等公開 API 穩定後，再決定是否拆成獨立 Package。
+
+lib/
+├── app_ui/
+│   ├── foundation/
+│   │   ├── tokens/
+│   │   │   ├── app_colors.dart
+│   │   │   ├── app_spacing.dart
+│   │   │   ├── app_radius.dart
+│   │   │   ├── app_typography.dart
+│   │   │   ├── app_dimensions.dart
+│   │   │   ├── app_motion.dart
+│   │   │   ├── app_elevation.dart
+│   │   │   └── app_opacity.dart
+│   │   ├── theme/
+│   │   │   ├── app_theme.dart
+│   │   │   ├── app_theme_data.dart
+│   │   │   └── app_theme_extension.dart
+│   │   ├── shapes/
+│   │   ├── typography/
+│   │   └── accessibility/
+│   │
+│   ├── components/
+│   │   ├── buttons/
+│   │   ├── text_fields/
+│   │   ├── selection/
+│   │   ├── badges/
+│   │   ├── cards/
+│   │   ├── lists/
+│   │   ├── dividers/
+│   │   ├── icons/
+│   │   ├── avatars/
+│   │   ├── progress/
+│   │   ├── loading/
+│   │   ├── empty_states/
+│   │   └── feedback/
+│   │
+│   ├── layout/
+│   │   ├── app_scaffold.dart
+│   │   ├── adaptive_layout.dart
+│   │   ├── adaptive_grid.dart
+│   │   ├── adaptive_columns.dart
+│   │   ├── safe_area_layout.dart
+│   │   ├── constrained_content.dart
+│   │   └── responsive_visibility.dart
+│   │
+│   ├── navigation/
+│   │   ├── app_navigation_bar.dart
+│   │   ├── app_navigation_rail.dart
+│   │   ├── app_sidebar.dart
+│   │   ├── app_tab_bar.dart
+│   │   ├── app_page_transition.dart
+│   │   └── app_navigation_controller.dart
+│   │
+│   ├── presentation/
+│   │   ├── app_sheet.dart
+│   │   ├── app_dialog.dart
+│   │   ├── app_popover.dart
+│   │   ├── app_context_menu.dart
+│   │   ├── app_overlay.dart
+│   │   └── presentation_controller.dart
+│   │
+│   ├── interaction/
+│   │   ├── gestures/
+│   │   ├── drag_drop/
+│   │   ├── scrolling/
+│   │   ├── focus/
+│   │   └── haptics/
+│   │
+│   ├── engines/
+│   │   ├── adaptive/
+│   │   ├── gesture_coordinator/
+│   │   ├── drag_coordinator/
+│   │   ├── overlay_manager/
+│   │   └── animation/
+│   │
+│   ├── platform/
+│   │   ├── app_platform_capabilities.dart
+│   │   ├── app_haptics.dart
+│   │   ├── app_foldable_info.dart
+│   │   ├── app_drag_drop.dart
+│   │   └── adapters/
+│   │
+│   ├── testing/
+│   │   ├── test_helpers.dart
+│   │   ├── golden_test_helpers.dart
+│   │   └── interaction_test_helpers.dart
+│   │
+│   └── app_ui.dart
+│
+├── features/
+│   ├── calendar/
+│   ├── tasks/
+│   └── courses/
+│
+test/
+├── foundation/
+├── components/
+├── layout/
+├── navigation/
+├── presentation/
+├── interaction/
+├── adaptive/
+├── platform/
+└── integration/
+
+目錄可以隨實作調整，不需要一開始就建立所有空檔案。
+
+⸻
+
+4. Foundation：設計基礎系統
+
+這一層應該最先完成，因為所有元件都會依賴它。
+
+4.1 Design Tokens
+
+Colors
+
+建立語意化顏色，而不是讓元件直接指定 RGB。
+
+例如：
+
+* surface
+* surfaceSecondary
+* surfaceElevated
+* textPrimary
+* textSecondary
+* textTertiary
+* border
+* separator
+* accent
+* onAccent
+* success
+* warning
+* error
+* info
+* disabled
+
+需要支援：
+
+* Light Theme。
+* Dark Theme。
+* 未來可擴充的其他 Theme。
+* 語意化 Badge、狀態文字與提示顏色。
+* 元件在不同背景上的正確對比。
+* 系統主題切換。
+
+不應只建立單一灰階調色盤，也不應讓所有元件都使用同一個強調色。
+
+Spacing
+
+建立一致的間距尺度，例如：
+
+* xs
+* sm
+* md
+* lg
+* xl
+* xxl
+
+實際數值應透過原型和裝置測試決定，不要在每個頁面自行決定間距。
+
+Radius
+
+需要分開設計：
+
+1. 圓角大小。
+2. 圓角曲線的視覺形狀。
+3. 不同元件的圓角規則。
+
+例如：
+
+* small
+* medium
+* large
+* card
+* sheet
+* pill
+
+如果希望呈現更接近 iOS 的圓潤感，可以自訂 Shape 或 BorderRadius 的呈現方式；但不要假設只增加 radius 就一定能得到連續曲線的視覺效果。
+
+Typography
+
+建立：
+
+* Display。
+* Headline。
+* Title。
+* Body。
+* Label。
+* Caption。
+* Numeric。
+
+同時考慮：
+
+* 字重。
+* 行高。
+* 字距。
+* 系統字體。
+* 動態字體大小。
+* 中英文混排。
+* 數字對齊。
+
+Dimensions
+
+集中管理：
+
+* 最小觸控尺寸。
+* 按鈕高度。
+* 輸入框高度。
+* 導覽列高度。
+* Sheet 的最小與最大尺寸。
+* 內容最大寬度。
+* 卡片最大寬度。
+* 頁面邊距。
+
+Motion
+
+建立統一的動畫規則：
+
+* fast
+* normal
+* slow
+* spring
+* emphasized
+
+實際應以動畫目的選擇曲線與時間，而不是所有元件都使用相同的彈簧動畫。
+
+需要支援：
+
+* 按壓縮放。
+* Sheet 開關。
+* 頁面轉場。
+* Popover 顯示。
+* 拖曳吸附。
+* 取消動畫。
+* Reduce Motion。
+
+Elevation 與 Opacity
+
+管理：
+
+* 陰影層級。
+* 遮罩透明度。
+* Disabled 狀態。
+* Hover 狀態。
+* Pressed 狀態。
+* 拖曳預覽的視覺層級。
+
+4.2 Theme 系統
+
+建立 AppTheme，由最上層注入。
+
+每個元件應從 Theme 取得顏色、尺寸與動畫參數，而不是直接依賴全域常數。
+
+必須支援：
+
+* Light / Dark。
+* Theme Extension。
+* 語意化顏色。
+* 測試時替換 Theme。
+* 元件的局部覆寫。
+
+4.3 Shape 系統
+
+建立自己的 Shape 與圓角規則。
+
+初期先使用 Flutter 的 ShapeBorder、BorderRadius 與 Clip API。只有當標準形狀無法滿足視覺需求時，才實作自訂 ShapeBorder 或 CustomClipper。
+
+避免為了視覺細節就直接使用複雜的 CustomPainter，因為這會增加命中測試、裁切與動畫維護成本。
+
+⸻
+
+5. 基礎 Components
+
+以下是第一批應建立的元件。
+
+5.1 Buttons
+
+需要：
+
+* AppButton
+* AppIconButton
+* AppTextButton
+* AppButtonGroup
+* AppFloatingActionButton
+
+Button Variants
+
+* Primary。
+* Secondary。
+* Outline。
+* Ghost。
+* Destructive。
+
+Button States
+
+* Idle。
+* Pressed。
+* Hovered。
+* Focused。
+* Disabled。
+* Loading。
+
+必要功能
+
+* 自訂尺寸。
+* Icon + Text。
+* Icon-only。
+* Loading Indicator。
+* 非同步操作期間避免重複提交。
+* 最小觸控範圍。
+* Haptic Feedback。
+* Keyboard Focus。
+* 無障礙語意。
+* 可調整的 Press Animation。
+
+Press Animation
+
+按下時可縮小，放開時恢復，並處理：
+
+* 按下後取消。
+* 手指移出後放開。
+* 快速連續點擊。
+* Disabled 狀態。
+* 動畫期間再次觸發。
+* Reduce Motion。
+
+不要只測試正常點擊，必須測試手指滑出按鈕後放開的行為。
+
+5.2 Text 與 Typography
+
+需要：
+
+* AppText
+* AppHeading
+* AppLabel
+* AppCaption
+* AppRichText
+
+支援：
+
+* 語意化字體樣式。
+* 動態字體。
+* 文字縮放。
+* 最大行數。
+* Ellipsis。
+* 中英文混排。
+* 無障礙朗讀。
+
+5.3 Icons
+
+需要：
+
+* AppIcon
+* AppIconButton
+
+統一圖示尺寸、顏色與對齊方式。
+
+不要在整套 Library 中混用大量不同風格的 Icon Set。建立一個主要圖示來源，必要時再提供替代圖示。
+
+5.4 Badges
+
+需要：
+
+* AppBadge
+* AppStatusBadge
+* AppCountBadge
+* AppDotIndicator
+
+支援：
+
+* Neutral。
+* Info。
+* Success。
+* Warning。
+* Error。
+* 自訂尺寸。
+* Icon。
+* 數量上限。
+* 語意化標籤。
+
+Badge 的顏色應來自語意化 Token。
+
+5.5 Cards
+
+需要：
+
+* AppCard
+* AppInteractiveCard
+* AppCardHeader
+* AppCardSection
+
+支援：
+
+* 自訂內距。
+* 自訂圓角。
+* 陰影或邊框。
+* 點擊狀態。
+* 選取狀態。
+* 最大寬度。
+* 任意子元件組合。
+
+Card 不應限制只能放文字或固定類型的子元件。
+
+5.6 Text Fields
+
+需要：
+
+* AppTextField
+* AppTextArea
+* AppSearchField
+* AppPasswordField
+* AppNumberField
+
+支援：
+
+* Label。
+* Placeholder。
+* Helper Text。
+* Error Text。
+* Prefix / Suffix。
+* Leading / Trailing Widget。
+* Clear Button。
+* Focus State。
+* Validation。
+* Keyboard Type。
+* Submit Action。
+* 字數限制。
+* 自動調整高度。
+* 無障礙語意。
+
+需要明確定義 Focus、Error、Disabled 與 Loading 的優先順序。
+
+5.7 Selection Components
+
+需要：
+
+* AppCheckbox
+* AppRadio
+* AppSwitch
+* AppSegmentedControl
+* AppChoiceChip
+* AppFilterChip
+* AppSelectableListItem
+
+支援：
+
+* 單選與多選。
+* Controlled / Uncontrolled State。
+* Disabled 狀態。
+* 鍵盤操作。
+* 選取動畫。
+* 語意化狀態。
+
+5.8 Lists 與 Dividers
+
+需要：
+
+* AppListTile
+* AppListSection
+* AppDivider
+* AppInsetDivider
+* AppReorderableList
+
+支援：
+
+* Leading / Trailing。
+* 多行文字。
+* Subtitle。
+* 狀態標記。
+* 點擊。
+* 滑動操作。
+* 拖曳排序。
+* 虛擬化長列表。
+* 可自訂分隔線。
+
+5.9 其他基礎元件
+
+還應包含：
+
+* AppAvatar
+* AppProgressIndicator
+* AppCircularProgress
+* AppSkeleton
+* AppSpinner
+* AppEmptyState
+* AppErrorState
+* AppPlaceholder
+* AppTooltip
+* AppDivider
+* AppImage
+* AppSelectableText
+
+這些元件應使用一致的 Design Tokens，不要各自建立不同的視覺規則。
+
+⸻
+
+6. Layout System
+
+這是整套 UI Library 的核心之一。
+
+6.1 AppScaffold
+
+統一管理頁面結構。
+
+需要：
+
+* Safe Area。
+* 主內容區。
+* Top Bar。
+* Bottom Navigation。
+* 浮動操作區。
+* Keyboard Insets。
+* Overlay。
+* 頁面背景。
+* 內容最大寬度。
+* 捲動行為。
+
+必須支援一般頁面、列表頁面、表單頁面與多欄頁面。
+
+6.2 Adaptive Environment
+
+建立統一的版面環境物件，例如 AppLayoutEnvironment。
+
+包含：
+
+* 可用 Window Size。
+* Width / Height。
+* Compact / Medium / Expanded Size Class。
+* Safe Area。
+* Keyboard Insets。
+* 方向與可用空間變化。
+* 輸入方式。
+* Foldable Posture。
+* Hinge / Occlusion Regions。
+* 目前頁面是否允許多欄。
+* 內容最大寬度。
+
+初始 Breakpoints
+
+可以先使用：
+
+* Compact：小於 600 logical pixels。
+* Medium：600–839 logical pixels。
+* Expanded：840 logical pixels 以上。
+
+這只是起始值，不是不可修改的標準。
+
+判斷應基於實際可用空間，而不是 deviceName 或「是不是 iPad」。
+
+6.3 AdaptiveLayout
+
+需要：
+
+* AppAdaptiveLayout
+* AppAdaptiveRow
+* AppAdaptiveColumns
+* AppAdaptiveGrid
+* AppConstrainedContent
+* AppResponsiveVisibility
+
+自動適應規則
+
+例如：
+
+* 手機預設單欄。
+* 中型寬度可以切換成雙欄。
+* 大螢幕避免讓文字內容無限制延伸。
+* 多欄布局可以設定主次欄比例。
+* 當空間不足時自動退回單欄。
+* Keyboard 出現時重新計算可用高度。
+
+手動覆寫
+
+允許：
+
+* forceSingleColumn。
+* forceTwoColumns。
+* maxContentWidth。
+* minColumnWidth。
+* mainAxisRatio。
+* compactOverride。
+* expandedOverride。
+
+但大部分頁面應使用預設自適應行為，不必手動判斷螢幕尺寸。
+
+6.4 Tablet Layout
+
+平板不應只是把手機畫面放大。
+
+需要支援：
+
+* Navigation Rail。
+* Sidebar。
+* 雙欄與三欄布局。
+* 主從式內容。
+* Detail Pane。
+* 最大內容寬度。
+* 浮動面板。
+* 多欄選取與拖曳。
+
+例如，課程列表可以在左欄，課程詳細資料在右欄；手機則改成先顯示列表，再進入詳細頁。
+
+6.5 Foldable Layout
+
+折疊裝置應視為獨立的 Layout 能力。
+
+需要：
+
+* 取得實際可用 Window Size。
+* 取得 Fold / Hinge 資訊。
+* 避開不可使用的區域。
+* 區分折疊與展開狀態。
+* 根據可用區域選擇單欄或雙欄。
+* 狀態改變時重新排版。
+* 在沒有 Foldable API 的平台上正常降級。
+
+對 iPhone Duo 這類裝置，不能只依靠螢幕寬度推斷折痕位置。若 Flutter 沒有提供所需的平台資訊，就透過獨立 Platform Adapter 補足。
+
+不要讓一般 Components 直接依賴某個特定折疊手機的型號。
+
+⸻
+
+7. Navigation System
+
+7.1 AppNavigationBar
+
+建立自訂浮動式底部導覽列。
+
+需要：
+
+* 多個 Navigation Items。
+* 選取狀態。
+* 圖示與標籤。
+* Badge。
+* 選取動畫。
+* 觸覺回饋。
+* Safe Area 處理。
+* 自訂高度、間距與圓角。
+
+特殊需求：內容從導覽列下方滑過
+
+這個行為必須明確定義。
+
+導覽列視覺上可以浮動於內容之上，但主內容仍需要預留適當的底部空間，避免最後一項被永久遮住。
+
+應提供兩種模式：
+
+* reservedSpace：主內容為導覽列預留空間，捲動內容可以滑到其下方。
+* overlay：導覽列真正覆蓋內容，適合明確需要遮蓋效果的頁面。
+
+不要把這兩種模式混成一個含糊的 Boolean。
+
+7.2 其他 Navigation Components
+
+需要：
+
+* AppNavigationRail
+* AppSidebar
+* AppTabBar
+* AppTopBar
+* AppBackButton
+* AppPageTransition
+* AppNavigationController
+
+支援：
+
+* 手機與平板切換。
+* Back Navigation。
+* Deep Link。
+* 頁面狀態保留。
+* 轉場動畫。
+* Keyboard Navigation。
+
+路由功能可以使用既有的 Routing Package；不需要自行重寫整個 Router。
+
+⸻
+
+8. Presentation System
+
+這一層負責 Sheet、Popover、Dialog 與 Context Menu。
+
+8.1 AppSheet
+
+這是第一批最重要的複雜元件之一。
+
+基本功能
+
+* 開啟與關閉。
+* 多個 Detents。
+* 初始高度。
+* 最大高度。
+* 最小高度。
+* 背景遮罩。
+* Drag Handle。
+* 圓角與動畫。
+* Safe Area。
+* Keyboard Insets。
+* Scrollable Content。
+* Nested Navigation。
+* 手勢取消。
+* 無障礙操作。
+
+Detents
+
+支援：
+
+* 固定高度。
+* 螢幕高度比例。
+* Content Fit。
+* Medium。
+* Large。
+* Custom Detent。
+
+例如：
+
+AppSheet(
+  detents: [
+    AppSheetDetent.fraction(0.30),
+    AppSheetDetent.fraction(0.60),
+    AppSheetDetent.large,
+  ],
+  initialDetent: AppSheetDetent.fraction(0.60),
+  child: TaskEditor(),
+)
+
+這只是建議的公開 API。
+
+Sheet Gesture Coordination
+
+需要明確處理：
+
+* Sheet 往上拉。
+* Sheet 往下拉。
+* 內部列表捲動。
+* 列表已經到頂部時向下拉。
+* 向下拖曳關閉。
+* 拖曳吸附到下一個 Detent。
+* 拖曳取消。
+* 快速甩動。
+* Keyboard 顯示時的高度變化。
+
+需要建立一套 Sheet State Machine，避免手勢與動畫互相覆蓋。
+
+Presentation Modes
+
+至少支援：
+
+* Bottom Sheet。
+* Floating Sheet。
+* Side Sheet。
+* Centered Panel。
+
+不同裝置可以使用不同呈現方式，但也允許頁面覆寫。
+
+8.2 AppPopover
+
+用於：
+
+* Date Picker。
+* Time Picker。
+* Tooltip。
+* Filter Panel。
+* 小型選單。
+* Contextual Actions。
+
+需要：
+
+* Anchor。
+* 自動選擇顯示方向。
+* 螢幕邊界偵測。
+* Safe Area。
+* 點擊外部關閉。
+* Escape 關閉。
+* Overlay 層級。
+* 可選的進入與離開動畫。
+
+如果可用空間不足，Popover 應自動改成 Sheet 或其他合適的呈現模式。
+
+8.3 AppDialog
+
+需要：
+
+* Alert Dialog。
+* Confirmation Dialog。
+* Form Dialog。
+* Destructive Confirmation。
+* 自訂內容。
+* Loading Dialog。
+
+支援：
+
+* Confirm / Cancel。
+* 非同步提交。
+* 防止重複操作。
+* Keyboard。
+* Focus Management。
+* 無障礙語意。
+
+8.4 AppContextMenu
+
+支援：
+
+* 點擊操作。
+* 長按操作。
+* 右鍵操作。
+* Keyboard Shortcut。
+* iOS / Android / Desktop 的不同輸入方式。
+* 自動選擇合適的位置。
+* Menu Item 的 Disabled / Destructive 狀態。
+
+⸻
+
+9. Picker System
+
+日期與時間選擇器應獨立設計，不要把它們全部做成固定底部的傳統 Picker。
+
+9.1 Date Picker
+
+需要：
+
+* Calendar Picker。
+* Compact Date Picker。
+* Inline Date Picker。
+* Range Picker。
+* Month / Year Selection。
+* Min / Max Date。
+* Disabled Dates。
+* Locale。
+* Week Start。
+* Date Formatting。
+
+9.2 Time Picker
+
+需要：
+
+* Hour / Minute。
+* 12 / 24 小時制。
+* Min / Max Time。
+* Time Interval。
+* Locale。
+* Keyboard Input。
+
+9.3 Adaptive Presentation
+
+根據場景與可用空間：
+
+* 小型表單欄位：優先使用 Popover 或 Compact Picker。
+* 手機需要較大操作區域時：使用 Sheet。
+* 平板可以使用浮動面板。
+* 螢幕空間足夠時：允許 Inline Picker。
+
+選擇器的資料與驗證邏輯應和呈現方式分離。
+
+⸻
+
+10. Global Interaction Engine
+
+這一層負責讓不同元件之間的互動一致。
+
+10.1 Gesture Coordination
+
+需要統一管理：
+
+* Tap。
+* Long Press。
+* Drag。
+* Pan。
+* Swipe。
+* Scroll。
+* Sheet Resize。
+* Dismiss Gesture。
+
+目標不是所有手勢都由一個巨大 Controller 處理，而是提供明確的互動規則與協調介面。
+
+例如，Sheet 內部的拖曳操作應該優先於 Sheet Resize；但一般列表捲動仍然要保持正常。
+
+需要定義：
+
+* 手勢開始條件。
+* 優先權。
+* 是否允許取消。
+* 手勢結束後的狀態。
+* 手勢失敗時如何回復。
+* 多個手勢競爭時的處理方式。
+
+10.2 Drag and Drop
+
+這是另一個核心功能。
+
+元件
+
+* AppDraggable<T>
+* AppDropTarget<T>
+* AppDragPreview
+* AppDragCoordinator
+* AppDragSession
+* AppDragState
+
+必須支援的場景
+
+1. 同一個列表內拖曳排序。
+2. 從一個列表拖到另一個列表。
+3. 從 Sheet 內拖到 Sheet 外。
+4. 從一個 Sheet 拖到另一個 Sheet。
+5. 從一個欄位拖到另一個欄位。
+6. 從卡片拖到資料夾。
+7. 平板雙欄布局的跨欄拖曳。
+8. 拖曳途中取消。
+9. 拖曳到無效目標。
+10. 拖曳時自動捲動列表。
+
+Drag Preview
+
+拖曳中的預覽必須獨立於來源元件的裁切區域。
+
+使用 Flutter 的 Draggable、DragTarget 與根層 Overlay 作為起點，但要特別測試不同 Route、Nested Navigator、Sheet 與 Overlay 之間的行為。
+
+如果內建機制不能滿足需求，再自行建立 Drag Coordinator。
+
+Drop Target
+
+需要：
+
+* 是否接受該資料。
+* 進入目標時的視覺狀態。
+* 離開目標時的視覺狀態。
+* 接受與拒絕的回饋。
+* Drop Animation。
+* 資料轉移回呼。
+* 取消與錯誤處理。
+
+跨 App 拖曳
+
+跨 Flutter App 內部的拖曳與跨原生 App 的拖放是兩種不同能力。
+
+第一階段先完成 App 內跨容器拖曳。跨 App Drag and Drop 則作為後續的 Platform Adapter 功能。
+
+⸻
+
+11. Overlay Manager
+
+Overlay 不應只靠每個元件自行建立。
+
+建立統一的 Overlay Manager，管理：
+
+* Sheet。
+* Popover。
+* Tooltip。
+* Context Menu。
+* Drag Preview。
+* Toast。
+* Loading Overlay。
+* Contextual Picker。
+
+需要：
+
+* Z-order。
+* Overlay Owner。
+* 開啟與關閉。
+* 點擊外部關閉。
+* Focus Management。
+* 路由切換時的清理。
+* App 進入背景時的處理。
+* Overlay 之間的互動規則。
+
+必須避免：
+
+* Drag Preview 被 Sheet 遮住。
+* Popover 出現在錯誤的 Overlay 上。
+* 路由離開後 Overlay 還存在。
+* Overlay 鎖住點擊事件。
+* 鍵盤與 Focus 被錯誤的 Overlay 搶走。
+
+⸻
+
+12. Feedback System
+
+需要建立統一的使用者回饋系統。
+
+12.1 Toast 與 Snackbar
+
+需要：
+
+* Success。
+* Error。
+* Warning。
+* Info。
+* Undo Action。
+* 自動消失。
+* 手動關閉。
+* 多個訊息排隊。
+* Safe Area。
+* 無障礙朗讀。
+
+12.2 Loading
+
+需要：
+
+* Inline Loading。
+* Button Loading。
+* Page Loading。
+* Overlay Loading。
+* Skeleton Loading。
+
+避免整個 App 只使用一種 Loading 表現。
+
+12.3 Haptic Feedback
+
+建立 AppHaptics，統一提供：
+
+* Selection。
+* Light Impact。
+* Medium Impact。
+* Heavy Impact。
+* Success。
+* Warning。
+* Error。
+
+先使用 Flutter 現有能力；需要更多平台控制時，再接原生 API。
+
+12.4 Error Presentation
+
+需要：
+
+* Inline Error。
+* Form Validation Error。
+* Empty State。
+* Retry Action。
+* Network Error。
+* Permission Error。
+
+UI Library 應負責錯誤呈現，而不是負責整個產品的錯誤碼與業務邏輯。
+
+⸻
+
+13. Platform Adapter
+
+所有平台專屬功能都應透過獨立介面使用。
+
+13.1 建議的 Platform Capabilities
+
+* Haptic Feedback。
+* Foldable Information。
+* Keyboard / Input Capabilities。
+* Native Drag and Drop。
+* Native Context Menu。
+* Platform-specific System Insets。
+* 特定原生動畫或互動能力。
+
+並非每項功能都需要 Platform Channel。有些 Flutter 已經提供完整 API，應優先使用現有 API。
+
+13.2 Foldable Adapter
+
+需要：
+
+* Fold State。
+* Hinge / Fold Bounds。
+* Occluded Regions。
+* Posture Changes。
+* 可用顯示區域。
+* 平台不支援時的降級結果。
+
+應使用事件串流監聽狀態變化。
+
+對 iPhone Duo 等裝置，必須先確認目標 iOS 版本、Flutter 版本及可用原生 API，再決定實作方式。
+
+13.3 Platform Channel 規則
+
+1. Dart 定義穩定的介面。
+2. 原生層只提供所需的平台能力。
+3. 使用明確的資料模型。
+4. 必須處理 Plugin 不存在或 API 不支援。
+5. 不應每一幀都跨 Platform Channel 傳送動畫資料。
+6. 對持續變化的狀態使用 Event Stream。
+7. 為 iOS 與 Android 分別測試。
+8. 原生功能不可用時提供合理降級。
+
+若通訊介面複雜，可以評估使用 Pigeon 產生型別安全的通訊程式碼。
+
+⸻
+
+14. Accessibility 與 Input System
+
+無障礙不是最後才補的功能。
+
+需要：
+
+* Semantic Labels。
+* Semantic Hints。
+* Focus Traversal。
+* Keyboard Navigation。
+* Dynamic Type。
+* High Contrast。
+* Reduce Motion。
+* Touch Target Size。
+* Screen Reader。
+* Escape / Back 操作。
+* 滑鼠 Hover。
+* 右鍵操作。
+* 鍵盤快捷鍵。
+
+每個互動元件都應定義：
+
+* 如何取得 Focus。
+* 如何操作。
+* 如何讀取狀態。
+* 如何取消。
+* 如何顯示 Disabled 狀態。
+
+拖曳不應是完成操作的唯一方式。對無法拖曳的使用者，應提供替代操作，例如「移動到資料夾」選單。
+
+⸻
+
+15. Testing Strategy
+
+這一套 Library 必須從第一天就有測試策略。
+
+15.1 Unit Tests
+
+測試：
+
+* Detent 計算。
+* Breakpoint 判定。
+* Adaptive Layout 決策。
+* Drag Session State。
+* Drop Acceptance。
+* Overlay Lifecycle。
+* Animation State。
+* Theme Token。
+* Platform Capability Fallback。
+
+15.2 Widget Tests
+
+測試：
+
+* 點擊與按壓動畫。
+* Disabled 狀態。
+* Loading 狀態。
+* 表單驗證。
+* 元件組合。
+* Sheet 開啟與關閉。
+* Popover 顯示位置。
+* Focus 與 Keyboard。
+* Layout 在不同尺寸下的變化。
+
+15.3 Golden Tests
+
+測試：
+
+* Light / Dark。
+* Button Variants。
+* Badge 顏色。
+* 卡片圓角。
+* Sheet 外觀。
+* Navigation Bar。
+* Phone / Tablet Layout。
+* 不同字體大小。
+* 錯誤與空狀態。
+
+Golden Tests 主要驗證視覺是否意外改變，不應取代實際互動測試。
+
+15.4 Integration Tests
+
+必須包含以下關鍵案例：
+
+1. 從 Sheet 拖曳項目到外層 Drop Target。
+2. 拖曳過程中不被 Sheet 裁切。
+3. 拖曳時不意外關閉 Sheet。
+4. 列表捲動不會誤觸拖曳。
+5. Sheet 在不同 Detents 間切換。
+6. Keyboard 出現時 Sheet 正確調整。
+7. Popover 不超出螢幕。
+8. 旋轉或視窗縮放後 Layout 正確。
+9. Foldable 狀態改變後 Layout 正確。
+10. 快速連續點擊不會重複提交。
+11. App 進入背景後 Overlay 與拖曳狀態正確清理。
+12. 減少動態效果時，操作仍然完整。
+
+15.5 Device Testing
+
+至少測試：
+
+* 小螢幕 iPhone。
+* 一般尺寸 iPhone。
+* 大螢幕 iPhone。
+* Android 手機。
+* iPad 或其他平板。
+* Android Foldable。
+* iPhone Duo 實機（可取得時）。
+
+模擬器可以測試大量基本行為，但折疊、原生手勢與部分平台 API 必須盡可能在實機驗證。
+
+⸻
+
+16. AI-friendly Development
+
+16.1 AGENTS.md
+
+在 Repository 根目錄建立 AGENTS.md，明確定義：
+
+* 必須使用 AppUI。
+* 不可任意使用 Material / Cupertino 元件。
+* 不可硬編碼顏色、間距與圓角。
+* 必須使用語意化 Token。
+* 優先重用既有 Components。
+* 複雜互動必須使用統一的 Engine。
+* 所有元件必須支援必要的 Disabled、Loading 與 Error 狀態。
+* 新增元件必須提供測試。
+* 修改互動引擎必須執行對應 Integration Tests。
+* 不可自行新增重複的 Overlay 或 Drag Coordinator。
+* 必須考慮無障礙與不同螢幕尺寸。
+
+16.2 Component Documentation
+
+每個公開元件都要有：
+
+* 用途。
+* API。
+* 必要參數。
+* 預設行為。
+* 可覆寫參數。
+* 使用範例。
+* 不適用場景。
+* 常見錯誤。
+* 測試案例。
+
+16.3 Component Gallery
+
+建立一個獨立的 Showcase 頁面，展示：
+
+* 所有 Variants。
+* 所有 States。
+* Light / Dark。
+* 不同螢幕尺寸。
+* 不同字體大小。
+* 互動範例。
+
+這能讓開發者和 AI 在實際使用前，先確認元件行為。
+
+16.4 API 穩定性
+
+公開 API 應保持簡單。
+
+不要讓一般產品頁面直接接觸：
+
+* Gesture Arena 的細節。
+* Overlay Entry 的管理。
+* 原生 Method Channel。
+* 底層 Animation Controller。
+* 複雜的拖曳狀態機。
+
+這些應該留在 Library 內部。
+
+⸻
+
+17. 完整製作順序
+
+以下按照依賴關係排序。每個階段都應先完成最小可用版本，再進入下一階段。
+
+Phase 0：需求與互動規格
+
+工作：
+
+* 整理所有預期元件。
+* 確認視覺風格。
+* 定義 Light / Dark。
+* 定義 Button、Sheet、Popover 與 Navigation 的互動規則。
+* 定義 Adaptive Layout 的預設行為。
+* 列出 iOS / Android 差異。
+* 建立互動原型。
+
+產出：
+
+* UI_LIBRARY_PLAN.md
+* INTERACTION_SPEC.md
+* DESIGN_TOKENS.md
+* PLATFORM_CAPABILITIES.md
+
+完成條件：
+
+* 核心互動有明確規格。
+* 不再依賴模糊的「要像 iOS 一樣」描述。
+
+Phase 1：Foundation
+
+工作：
+
+* 建立 Design Tokens。
+* 建立 AppTheme。
+* 建立 Typography。
+* 建立 Radius / Shape。
+* 建立 Motion。
+* 建立 Accessibility 基礎規則。
+
+產出：
+
+* 可以統一控制整套 UI 的設計基礎。
+
+完成條件：
+
+* 所有 Token 可集中修改。
+* Light / Dark 可正常切換。
+* 沒有不必要的硬編碼視覺數值。
+
+Phase 2：基礎 Components
+
+依序製作：
+
+1. AppText。
+2. AppIcon。
+3. AppButton。
+4. AppIconButton。
+5. AppBadge。
+6. AppDivider。
+7. AppCard。
+8. AppTextField。
+9. AppCheckbox / AppSwitch。
+10. AppListTile。
+11. AppProgressIndicator。
+12. AppEmptyState / AppErrorState。
+
+每個元件都需要：
+
+* 公開 API。
+* 基本測試。
+* Golden Tests。
+* 使用範例。
+* Accessibility 支援。
+
+完成條件：
+
+* 可以用自己的元件完成一般表單、列表與卡片頁面。
+
+Phase 3：Layout Engine
+
+工作：
+
+* 建立 AppLayoutEnvironment。
+* 建立 Breakpoints。
+* 建立 AppAdaptiveLayout。
+* 建立 AppConstrainedContent。
+* 建立 Adaptive Grid / Columns。
+* 處理 Safe Area 與 Keyboard Insets。
+* 加入手動 Override。
+
+完成條件：
+
+* 同一個頁面可以在手機與平板自動切換合理布局。
+* 一般頁面不需要手動判斷裝置型號。
+
+Phase 4：Navigation 與 Overlay
+
+工作：
+
+* 建立 AppScaffold。
+* 建立浮動 Navigation Bar。
+* 建立 Navigation Rail / Sidebar。
+* 建立 Overlay Manager。
+* 建立基本 Dialog。
+* 建立 Page Transition。
+
+完成條件：
+
+* 導覽列可以依規格呈現。
+* Overlay 不會因為頁面切換而殘留。
+* 手機與平板的 Navigation 可以自適應。
+
+Phase 5：Sheet Engine
+
+工作：
+
+* 建立 AppSheet。
+* 建立 Detent State Machine。
+* 實作拖曳、吸附與關閉。
+* 處理內部 Scrollable。
+* 處理 Keyboard。
+* 處理 Safe Area。
+* 建立 Floating / Side Presentation。
+
+完成條件：
+
+* Sheet 的拖曳與內部列表捲動不會互相干擾。
+* 不同高度之間切換穩定。
+* 開啟、關閉與取消都有正確狀態。
+
+Phase 6：Global Drag and Drop
+
+工作：
+
+* 建立 AppDragCoordinator。
+* 建立 AppDraggable。
+* 建立 AppDropTarget。
+* 建立 Drag Preview。
+* 整合根層 Overlay。
+* 協調 Sheet 與 Drag Gesture。
+* 實作 Drop Acceptance。
+* 實作拖曳取消與錯誤回復。
+* 加入跨列表、跨 Sheet、跨欄位測試。
+
+完成條件：
+
+* 可以從 Sheet 拖曳到外層。
+* Drag Preview 不會被 Sheet 裁切。
+* Drop Target 能正確收到資料。
+* 拖曳不會意外觸發 Sheet Resize 或 Dismiss。
+
+Phase 7：Popover 與 Picker
+
+工作：
+
+* 建立 AppPopover。
+* 建立 AppContextMenu。
+* 建立 AppDatePicker。
+* 建立 AppTimePicker。
+* 建立 Adaptive Presentation。
+* 處理螢幕邊界、Focus 與 Keyboard。
+
+完成條件：
+
+* 日期與時間選擇器能依可用空間切換呈現方式。
+* Popover 不會超出視窗。
+* 不同輸入方式都可以操作。
+
+Phase 8：Platform Adapter
+
+工作：
+
+* 建立 Platform Capability 介面。
+* 接入必要的原生功能。
+* 建立 Foldable Adapter。
+* 建立必要的 Method Channel / Event Channel。
+* 為不支援的功能提供降級方案。
+
+完成條件：
+
+* 一般 UI 不需要直接知道平台實作細節。
+* iOS 與 Android 能分別使用適合的平台能力。
+* 缺少原生 API 時不會讓整套 UI 崩潰。
+
+Phase 9：完整測試與穩定化
+
+工作：
+
+* 補齊 Unit Tests。
+* 補齊 Widget Tests。
+* 建立 Golden Test Baseline。
+* 建立 Integration Tests。
+* 在 iOS / Android 實機測試。
+* 測試平板與折疊布局。
+* 檢查記憶體、動畫效能與無障礙。
+* 修正 API 不一致之處。
+
+完成條件：
+
+* 核心互動具備自動化回歸測試。
+* 常見畫面尺寸與輸入方式都能正常工作。
+* 不會因為修改基礎元件而無法察覺其他頁面受到影響。
+
+Phase 10：正式使用與持續維護
+
+工作：
+
+* 在真實產品頁面中使用 AppUI。
+* 觀察實際開發是否順暢。
+* 收集缺少的元件與 API。
+* 修正過度抽象或難以組合的元件。
+* 維護變更紀錄。
+* 建立元件版本與相容性規則。
+
+完成條件：
+
+* 新產品頁面預設使用 AppUI。
+* 新增元件不需要重新發明手勢、動畫與自適應規則。
+* AI 可以根據文件與現有範例穩定地產生一致實作。
+
+⸻
+
+18. 建議的第一個可交付版本
+
+不要等到所有元件完成才開始使用。第一個版本應該只包含最能驗證整體架構的部分。
+
+MVP 必備功能
+
+* Design Tokens。
+* AppTheme。
+* AppText。
+* AppButton。
+* AppCard。
+* AppTextField。
+* AppScaffold。
+* AppAdaptiveLayout。
+* AppNavigationBar。
+* AppSheet。
+* AppPopover。
+* AppDraggable。
+* AppDropTarget。
+* AppDragCoordinator。
+* 基本 Platform Adapter。
+* Unit / Widget / Integration Tests。
+
+MVP 驗收情境
+
+建立一個真實的課程管理範例頁面：
+
+1. 手機上顯示課程列表。
+2. 點擊課程後開啟 Sheet。
+3. Sheet 可以在不同高度間切換。
+4. Sheet 內的課程可以拖到外層日期或分類區。
+5. 外層 Drop Target 能收到正確資料。
+6. 同一頁面在平板上自動轉換成雙欄布局。
+7. 日期選擇器在手機使用 Sheet，在較大畫面使用 Popover。
+8. 所有互動都有測試。
+9. Light / Dark Theme 均正常。
+10. Keyboard、取消拖曳與錯誤狀態都能正常處理。
+
+這個範例可以同時驗證 Foundation、Layout、Sheet、Drag and Drop、Popover 和 Platform Adapter 是否設計得合理。
+
+⸻
+
+19. 專案規則與工程要求
+
+必須遵守
+
+* 不可直接在產品頁面使用硬編碼顏色、圓角、間距。
+* 不可為同一個功能建立多套互不相容的元件。
+* 不可讓每個 Sheet 自行管理全域 Overlay。
+* 不可在每個頁面重新實作拖曳協調。
+* 不可只測試正常點擊而忽略取消、拖曳與快速連續操作。
+* 不可只用螢幕寬度判斷折疊裝置的折痕位置。
+* 不可假設 Platform Channel 可以解決所有手勢問題。
+* 不可為了追求完全自訂而重寫 Flutter 已經成熟的基礎能力。
+* 每個公開元件都必須有使用範例與基本測試。
+* 複雜互動必須有明確狀態機與整合測試。
+
+每次修改核心元件時
+
+1. 確認 API 是否向後相容。
+2. 執行相關 Unit Tests。
+3. 執行 Widget Tests。
+4. 執行受影響的 Golden Tests。
+5. 修改互動引擎時執行 Integration Tests。
+6. 更新文件與範例。
+7. 確認沒有引入新的平台差異。
+
+⸻
+
+20. 最終建議
+
+這個專案最重要的不是元件數量，而是讓所有元件共享一致的規則。
+
+建議優先順序：
+
+1. Foundation 與 Design Tokens。
+2. 基礎 Components。
+3. Adaptive Layout。
+4. Navigation 與 Overlay。
+5. Sheet Engine。
+6. Global Drag and Drop。
+7. Popover 與 Picker。
+8. Platform Adapter。
+9. 無障礙、效能與完整測試。
+10. 依照真實產品需求持續擴充。
+
+尤其應該把 Sheet、拖曳與手勢協調視為同一個互動系統的不同部分，而不是三個完全獨立的元件。
+
+如果這個架構設計得好，未來你要加入新的元件、支援新的裝置，或讓 AI 協助實作新頁面時，就不需要每次重新處理相同的底層問題。

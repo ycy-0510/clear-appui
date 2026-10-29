@@ -4,6 +4,12 @@
 .dart_tool/
 build/
 .fvm/
+.widget_preview/
+AGENTS.md
+TODO.md
+doc/app_ui/
+example/ios/
+example/macos/
 coverage/
 staging/
 *.log

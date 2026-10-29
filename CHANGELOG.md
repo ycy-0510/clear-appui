@@ -1,3 +1,42 @@
+## Unreleased
+
+- Rename the fork to Clear AppUI (`ycy-0510/clear-appui`), document GitHub
+  installation and preview workflows, and retain the `fossui` Dart package ID.
+- Audit all 39 component families in a searchable gallery with light/dark,
+  narrow/wide, 2× text, RTL and long-content cases.
+- Fix compact grouped checkbox/radio targets, number-field steppers and chip
+  removal targets, plus combobox clear/trigger targets; include transparent
+  toggle/chip padding in hit testing.
+- Keep tabs, toggle groups, OTP slots and pagination usable in narrow layouts;
+  reveal keyboard-focused tabs and active OTP slots when scrolling is needed.
+- Constrain badge and formatted progress/meter values, scroll long popovers,
+  and label date/time triggers and popover controls for assistive technology.
+- Fix full-target button and bottom destination hit testing; navigation activates
+  synchronously with press, keyboard, accessibility and optional haptic feedback.
+- Refresh AppUI's grouped surfaces, spacing, corner hierarchy and course layout;
+  preserve tab state and reserve navigation space at larger text sizes.
+
+### Added
+
+* Product APIs through `app_ui.dart`: shared theme tokens, guarded async
+  actions, adaptive panes, floating navigation, adaptive date selection and
+  route-owned presentation/drag coordination.
+* Multi-detent sheets with a tappable, keyboard-accessible grabber and
+  continuously adaptive shape, margins and frosted material inspired by Apple's
+  iOS 26 guidance. Programmatic snapping remains interruptible by new gestures.
+* Course-management acceptance flow, a macOS gallery launcher and nine isolated
+  Widget Preview configurations. CPU-aware development launchers and a complete
+  implementation checklist accompany the fork.
+* Example iOS and macOS Info.plist files explicitly declare
+  `ITSAppUsesNonExemptEncryption` as false.
+
+### Changed
+
+* Pin Flutter 3.47.8 for stable Widget Preview support, migrate redundant future
+  annotations, and update reviewed SDK-specific visual references.
+* Use `lucide_icons_flutter` in the example for compatibility with final
+  `IconData` in newer Flutter SDKs. The library retains icon-agnostic slots.
+
 ## 0.1.2
 
 ### Added

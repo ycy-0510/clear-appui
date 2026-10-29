@@ -667,16 +667,14 @@ void main() {
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
     });
 
-    testWidgets('a grouped plain item hugs its content, not a 48px floor', (
+    testWidgets('a grouped plain item keeps a 48px touch target', (
       tester,
     ) async {
       await tester.pumpWidget(_group(onChanged: (_) {}));
 
-      // The item tracks the box and label height so a stacked group stays tight
-      // against the reference, not padded out to a 48px tap floor.
       expect(
         tester.getSize(find.byType(FossCheckboxItem<String>).first).height,
-        lessThan(48),
+        greaterThanOrEqualTo(48),
       );
     });
 

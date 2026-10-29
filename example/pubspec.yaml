@@ -1,5 +1,5 @@
 name: fossui_example
-description: A minimal example that renders a few fossui components.
+description: Clear AppUI's 39-component catalog and product interaction demo.
 publish_to: none
 
 environment:
@@ -11,4 +11,9 @@ dependencies:
     sdk: flutter
   fossui:
     path: ../
-  lucide_icons: ^0.257.0
+  lucide_icons_flutter: ^4.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^10.2.0

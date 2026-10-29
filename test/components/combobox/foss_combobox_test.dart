@@ -51,6 +51,31 @@ Widget _bottomHost(Widget child) => FossTheme(
 );
 
 void main() {
+  testWidgets('clear has a real 48px target and clears from its edge', (
+    tester,
+  ) async {
+    final controller = TextEditingController(text: 'Apple');
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      host(
+        FossAutocomplete(
+          items: _fruits,
+          controller: controller,
+          showClear: true,
+        ),
+      ),
+    );
+    final clear = find.byWidgetPredicate(
+      (w) => w is Semantics && w.properties.label == 'Clear',
+    );
+    final rect = tester.getRect(clear);
+    expect(rect.width, greaterThanOrEqualTo(48));
+    expect(rect.height, greaterThanOrEqualTo(48));
+    await tester.tapAt(Offset(rect.left + 1, rect.top + 1));
+    await tester.pump();
+    expect(controller.text, isEmpty);
+  });
+
   group('FossAutocomplete', () {
     testWidgets('opens on focus and lists the items', (tester) async {
       final focus = FocusNode();

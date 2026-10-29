@@ -551,12 +551,15 @@ class _StepperState extends State<_Stepper> {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: widget.interactive ? widget.onStep : null,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Positioned.fill(child: fill),
-              glyph,
-            ],
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned.fill(child: fill),
+                glyph,
+              ],
+            ),
           ),
         ),
       ),

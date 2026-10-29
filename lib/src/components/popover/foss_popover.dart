@@ -134,6 +134,7 @@ class FossPopover extends StatefulWidget {
     this.sideOffset = kAnchorSideOffset,
     this.alignOffset = 0,
     this.modal = false,
+    this.scrollable = true,
     this.dismissible = true,
     this.semanticsLabel,
     this.style,
@@ -175,6 +176,10 @@ class FossPopover extends StatefulWidget {
   /// Whether to draw a scrim behind the surface and trap focus inside it.
   /// Defaults to false (non-modal).
   final bool modal;
+
+  /// Scrolls intrinsically sized content when the available height is limited.
+  /// Set false when [builder] returns a viewport that owns its own scrolling.
+  final bool scrollable;
 
   /// Whether an outside tap or `Escape` dismisses the popover. Default true.
   final bool dismissible;
@@ -291,7 +296,7 @@ class _FossPopoverState extends State<FossPopover>
     _portal.show();
     _attachScrollDismiss();
     _animation.duration = _reduceMotion ? Duration.zero : _duration;
-    unawaited(_animation.forward(from: _reduceMotion ? 1 : 0));
+    _animation.forward(from: _reduceMotion ? 1 : 0);
     // Move focus into the surface once it has mounted: the first focusable
     // content, or the surface scope itself when the content has none.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -431,6 +436,7 @@ class _FossPopoverState extends State<FossPopover>
         onTapOutside: widget.modal ? null : (_) => _dismiss(),
         child: _PopoverSurface(
           builder: widget.builder,
+          scrollable: widget.scrollable,
           style: widget.style,
           semanticsLabel: widget.semanticsLabel,
         ),
@@ -450,13 +456,15 @@ class _FossPopoverState extends State<FossPopover>
     trigger = TapRegion(groupId: _tapGroup, child: trigger);
     trigger = Focus(focusNode: _triggerFocus, child: trigger);
 
-    return Semantics(
-      button: true,
-      expanded: _isOpen,
-      child: OverlayPortal(
-        controller: _portal,
-        overlayChildBuilder: _buildOverlay,
-        child: trigger,
+    return OverlayPortal(
+      controller: _portal,
+      overlayChildBuilder: _buildOverlay,
+      child: MergeSemantics(
+        child: Semantics(
+          button: true,
+          expanded: _isOpen,
+          child: trigger,
+        ),
       ),
     );
   }
@@ -467,11 +475,13 @@ class _FossPopoverState extends State<FossPopover>
 class _PopoverSurface extends StatelessWidget {
   const _PopoverSurface({
     required this.builder,
+    required this.scrollable,
     required this.style,
     required this.semanticsLabel,
   });
 
   final WidgetBuilder builder;
+  final bool scrollable;
   final FossPopoverStyle? style;
   final String? semanticsLabel;
 
@@ -509,7 +519,9 @@ class _PopoverSurface extends StatelessWidget {
                   style: theme.typography.sm.copyWith(
                     color: s?.foregroundColor ?? colors.popoverForeground,
                   ),
-                  child: Builder(builder: builder),
+                  child: scrollable
+                      ? SingleChildScrollView(child: Builder(builder: builder))
+                      : Builder(builder: builder),
                 ),
               ),
               // Purely decorative, and above the content, so it must not

@@ -18,7 +18,7 @@ By taking part you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 The package pins its Flutter SDK with [fvm](https://fvm.app):
 
 ```bash
-fvm install          # uses .fvmrc (Flutter 3.41.9)
+fvm install          # uses .fvmrc (Flutter 3.47.8)
 fvm flutter pub get
 ```
 

@@ -313,7 +313,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final rowBottom = tester.getRect(find.byType(Row)).bottom;
+      final rowBottom = tester.getRect(find.byType(OverflowBar)).bottom;
       final track = find
           .descendant(
             of: find.byType(FossProgress),

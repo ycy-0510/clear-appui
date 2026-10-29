@@ -140,16 +140,27 @@ class FossPagination extends StatelessWidget {
             gap: visuals.gap,
             slot: slot,
           );
-          return Row(
+          var entries = pageWindow(
+            page: page,
+            pageCount: pageCount,
+            siblingCount: siblings,
+          );
+          final width =
+              2 * _minSlot +
+              entries.fold<double>(
+                0,
+                (sum, n) => sum + (n == null ? visuals.ellipsisWidth : slot),
+              ) +
+              (entries.length + 1) * visuals.gap;
+          // Even the zero-sibling window needs seven targets. Small viewports
+          // keep previous/current/next rather than overflowing that minimum.
+          if (width > constraints.maxWidth) entries = [page];
+          final row = Row(
             mainAxisSize: MainAxisSize.min,
             spacing: visuals.gap,
             children: [
               _step(visuals, target: page - 1, forward: false),
-              for (final entry in pageWindow(
-                page: page,
-                pageCount: pageCount,
-                siblingCount: siblings,
-              ))
+              for (final entry in entries)
                 if (entry case final n?)
                   _pageButton(n, visuals, numberStyle)
                 else
@@ -157,6 +168,12 @@ class FossPagination extends StatelessWidget {
               _step(visuals, target: page + 1, forward: true),
             ],
           );
+          return constraints.maxWidth < 3 * slot + 2 * visuals.gap
+              ? SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: row,
+                )
+              : row;
         },
       ),
     );

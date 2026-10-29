@@ -45,6 +45,26 @@ void main() {
   final destructive = FossThemeData.light.colors.destructive;
 
   group('typing', () {
+    testWidgets('reveals the active slot in a narrow field', (tester) async {
+      await tester.pumpWidget(
+        host(const SizedBox(width: 180, child: FossOtpField(length: 6))),
+      );
+      await _enter(tester, '12345');
+      await tester.pump();
+      final scrollable = tester.state<ScrollableState>(
+        find
+            .descendant(
+              of: find.byType(SingleChildScrollView),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      expect(scrollable.position.pixels, greaterThan(0));
+      final field = tester.getRect(find.byType(FossOtpField));
+      expect(field.contains(tester.getCenter(find.text('5'))), isTrue);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('fills slots and reports the code', (tester) async {
       String? seen;
       await tester.pumpWidget(

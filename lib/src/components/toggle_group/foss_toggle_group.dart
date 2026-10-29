@@ -260,7 +260,12 @@ class FossToggleGroup extends StatelessWidget {
       role: _single ? SemanticsRole.radioGroup : SemanticsRole.none,
       child: FocusTraversalGroup(
         policy: WidgetOrderTraversalPolicy(),
-        child: bar,
+        child: orientation == Axis.horizontal
+            ? SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: bar,
+              )
+            : bar,
       ),
     );
   }

@@ -188,16 +188,20 @@ class FossMeter extends StatelessWidget {
         .merge(s?.valueStyle);
 
     return ExcludeSemantics(
-      child: Row(
+      child: OverflowBar(
+        alignment: label == null
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.spaceBetween,
+        overflowAlignment: OverflowBarAlignment.end,
+        overflowSpacing: theme.spacing(1),
         children: [
-          Expanded(
-            child: Text(
-              label ?? '',
+          if (label != null)
+            Text(
+              label!,
               style: labelStyle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-          ),
           if (showValue)
             Text(
               valueText,

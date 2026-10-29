@@ -275,6 +275,7 @@ class _FossButtonState extends State<FossButton> {
           ),
         },
         child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTapDown: widget.enabled
               ? (_) => _states.update(WidgetState.pressed, true)
               : null,

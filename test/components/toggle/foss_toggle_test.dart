@@ -23,6 +23,28 @@ void main() {
   final colors = FossThemeData.light.colors;
   Color pressedFill() => colors.input.withValues(alpha: colors.input.a * 0.64);
 
+  testWidgets('transparent space inside the target activates the toggle', (
+    tester,
+  ) async {
+    var calls = 0;
+    await tester.pumpWidget(
+      host(
+        SizedBox(
+          width: 240,
+          child: FossToggle(
+            pressed: false,
+            onPressedChanged: (_) => calls++,
+            child: const Text('Go'),
+          ),
+        ),
+      ),
+    );
+    final bounds = tester.getRect(find.byType(FossToggle));
+    await tester.tapAt(bounds.centerLeft + const Offset(2, 0));
+    await tester.tapAt(bounds.topCenter + const Offset(0, 2));
+    expect(calls, 2);
+  });
+
   group('FossToggle pressed logic', () {
     testWidgets('off tap reports true', (tester) async {
       bool? next;

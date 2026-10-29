@@ -46,6 +46,34 @@ void main() {
   });
 
   group('FossTabs selection', () {
+    testWidgets('keyboard selection reveals a tab outside the narrow strip', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        host(
+          SizedBox(
+            width: 180,
+            child: FossTabs<int>(
+              tabs: [
+                for (var i = 0; i < 8; i++)
+                  FossTab(value: i, label: 'Section $i', content: Text('$i')),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Section 0'));
+      await tester.sendKeyEvent(LogicalKeyboardKey.end);
+      await tester.pumpAndSettle();
+      final strip = tester.getRect(find.byType(SingleChildScrollView));
+      expect(strip.contains(tester.getCenter(find.text('Section 7'))), isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pumpAndSettle();
+      expect(find.text('7'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('renders every label and the active panel', (tester) async {
       await tester.pumpWidget(
         host(const FossTabs<String>(tabs: _tabs, initialValue: 'one')),

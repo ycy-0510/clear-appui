@@ -193,6 +193,7 @@ class _FossToggleState extends State<FossToggle> {
           ),
         },
         child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: widget.enabled ? _toggle : null,
           child: ConstrainedBox(
             constraints: const BoxConstraints(

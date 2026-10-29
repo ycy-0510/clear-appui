@@ -164,19 +164,23 @@ class FossProgress extends StatelessWidget {
         .merge(s?.valueLabelStyle);
 
     return ExcludeSemantics(
-      child: Row(
+      child: OverflowBar(
+        alignment: label == null
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.spaceBetween,
+        overflowAlignment: OverflowBarAlignment.end,
+        overflowSpacing: theme.spacing(1),
         children: [
-          Expanded(
-            child: Text(
-              label ?? '',
+          if (label != null)
+            Text(
+              label!,
               style: labelStyle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-          ),
-          if (valueLabel case final valueLabel?)
+          if (valueLabel != null)
             Text(
-              valueLabel,
+              valueLabel!,
               style: valueStyle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

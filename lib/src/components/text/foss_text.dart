@@ -23,8 +23,7 @@ enum FossTextSize {
   xl,
 
   /// 24 px: large headings.
-  xl2
-  ;
+  xl2;
 
   TextStyle _style(FossTypography t) => switch (this) {
     FossTextSize.xs => t.xs,
@@ -48,8 +47,7 @@ enum FossTextWeight {
   semibold(FontWeight.w600),
 
   /// Bold weight (700): emphasis.
-  bold(FontWeight.w700)
-  ;
+  bold(FontWeight.w700);
 
   const FossTextWeight(this.value);
 
@@ -70,8 +68,7 @@ enum FossTextColor {
   primary,
 
   /// The destructive (danger) color.
-  destructive
-  ;
+  destructive;
 
   Color _resolve(FossColors c) => switch (this) {
     FossTextColor.foreground => c.foreground,

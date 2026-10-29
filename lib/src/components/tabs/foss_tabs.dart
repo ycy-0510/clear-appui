@@ -211,6 +211,17 @@ class _FossTabsState<T> extends State<FossTabs<T>> {
     if (widget.value == null && value != _internal) {
       setState(() => _internal = value);
     }
+    _reveal(value);
+  }
+
+  void _reveal(T value) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final tabContext = _tabKeys[value]?.currentContext;
+      if (tabContext != null) {
+        Scrollable.ensureVisible(tabContext);
+      }
+    });
   }
 
   // Reads the active tab's box in the strip's coordinate space after layout, so
@@ -282,7 +293,9 @@ class _FossTabsState<T> extends State<FossTabs<T>> {
       _ => null,
     };
     if (target == null) return KeyEventResult.ignored;
-    _nodeFor(widget.tabs[target].value).requestFocus();
+    final value = widget.tabs[target].value;
+    _nodeFor(value).requestFocus();
+    _reveal(value);
     return KeyEventResult.handled;
   }
 
@@ -303,20 +316,30 @@ class _FossTabsState<T> extends State<FossTabs<T>> {
     }
 
     final stripVisual = _buildStrip(theme, v, reduceMotion);
-    final strip = Semantics(
+    final stripRole = Semantics(
       role: SemanticsRole.tabBar,
       container: true,
       // A vertical strip sits in a Row, which hands a non-flex child unbounded
       // width; the strip hugs its widest tab, so cap it to the intrinsic width.
       child: _horizontal ? stripVisual : IntrinsicWidth(child: stripVisual),
     );
+    // Keep the scroll node outside the tabBar role: its direct semantic
+    // children must be tabs, rather than a generic scrolling container.
+    final strip = _horizontal
+        ? SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: stripRole,
+          )
+        : stripRole;
 
     _scheduleMeasure();
 
-    final children = <Widget>[strip];
+    final children = <Widget>[
+      if (_horizontal) strip else Flexible(child: strip),
+    ];
     if (active?.content case final content?) {
       final panel = Semantics(role: SemanticsRole.tabPanel, child: content);
-      children.add(_horizontal ? panel : Expanded(child: panel));
+      children.add(_horizontal ? panel : Expanded(flex: 2, child: panel));
     }
 
     return _horizontal

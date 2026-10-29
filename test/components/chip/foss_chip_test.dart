@@ -423,7 +423,7 @@ void main() {
 
     testWidgets('an inert chip keeps its exact height', (tester) async {
       await tester.pumpWidget(
-        host(FossChip(label: const Text('Design'), onRemove: () {})),
+        host(const FossChip(label: Text('Design'))),
       );
 
       expect(tester.getSize(find.byType(FossChip)).height, 32);
@@ -547,31 +547,31 @@ void main() {
       );
     });
 
-    testWidgets('the close affordance reaches the minimum tap target', (
+    testWidgets('the close affordance has a real target at all four edges', (
       tester,
     ) async {
+      var removed = 0;
       await tester.pumpWidget(
         host(
           FossChip(
             label: const Text('Design'),
             size: FossChipSize.sm,
-            onRemove: () {},
+            onRemove: () => removed++,
           ),
         ),
       );
-
-      final box = tester.getSize(
-        find
-            .descendant(of: _removeFinder(), matching: find.byType(OverflowBox))
-            .first,
-      );
-      expect(box.height, lessThan(48));
-      final region = tester.renderObject(
-        find
-            .descendant(of: _removeFinder(), matching: find.byType(SizedBox))
-            .first,
-      );
-      expect(region, isNotNull);
+      final bounds = tester.getRect(_removeFinder());
+      expect(bounds.width, greaterThanOrEqualTo(48));
+      expect(bounds.height, greaterThanOrEqualTo(48));
+      for (final point in [
+        bounds.centerLeft + const Offset(2, 0),
+        bounds.centerRight - const Offset(2, 0),
+        bounds.topCenter + const Offset(0, 2),
+        bounds.bottomCenter - const Offset(0, 2),
+      ]) {
+        await tester.tapAt(point);
+      }
+      expect(removed, 4);
     });
   });
 }

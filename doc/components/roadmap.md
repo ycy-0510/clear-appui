@@ -10,10 +10,11 @@ Status legend:
 - `[~]` in progress
 - `[ ]` planned, not started
 
-Every component marked `[x]` clears the same bar before it ships: themed tokens,
-light and dark, full keyboard and screen-reader support, text-scale and
-right-to-left layout, and three layers of tests. That bar is written down in
-[checklist.md](checklist.md).
+The upstream quality bar is written down in [checklist.md](checklist.md).
+This roadmap records API availability; it is not evidence that every platform
+and accessibility scenario has been independently verified in this fork.
+The fork's dated [component QA record](../app_ui/COMPONENT_QA.md) lists actual
+checks, source files, fixes and remaining validation for every component family.
 
 ## Available now
 

@@ -199,9 +199,19 @@ class _FossRadioState<T> extends State<FossRadio<T>> {
       option = Opacity(opacity: _disabledOpacity, child: option);
     }
 
-    // The plain option hugs its circle and label so a stacked group reads
-    // tight, matching the reference. The card supplies its own padded surface.
-    return option;
+    // Plain rows reserve the same real target as standalone controls. An
+    // accessible option cannot shrink to the line height of a short label.
+    return card
+        ? option
+        : ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              widthFactor: 1,
+              heightFactor: 1,
+              child: option,
+            ),
+          );
   }
 
   // The circle, aligned to the first text line when a label or description is

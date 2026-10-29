@@ -285,7 +285,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('a plain option hugs its content, not a 48px floor', (
+    testWidgets('a plain option keeps a 48px touch target', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -297,11 +297,9 @@ void main() {
         ),
       );
 
-      // The row tracks the circle and label height so a stacked group stays
-      // tight against the reference, not padded out to a 48px tap floor.
       expect(
         tester.getSize(find.byType(FossRadio<String>)).height,
-        lessThan(48),
+        greaterThanOrEqualTo(48),
       );
     });
   });

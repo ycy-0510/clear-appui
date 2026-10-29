@@ -29,6 +29,24 @@ void main() {
       expect(taps, 1);
     });
 
+    testWidgets('empty space inside the promised target is clickable', (
+      tester,
+    ) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        host(
+          SizedBox(
+            width: 240,
+            child: FossButton(onPressed: () => taps++, child: const Text('Go')),
+          ),
+        ),
+      );
+      final rect = tester.getRect(find.byType(FossButton));
+      await tester.tapAt(rect.centerLeft + const Offset(2, 0));
+      await tester.tapAt(rect.topCenter + const Offset(0, 2));
+      expect(taps, 2);
+    });
+
     testWidgets('a null onPressed disables the button', (tester) async {
       await tester.pumpWidget(host(const FossButton(child: Text('Go'))));
 
