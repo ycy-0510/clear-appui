@@ -68,16 +68,29 @@ class AppButton extends StatefulWidget {
 
 class _AppButtonState extends State<AppButton> {
   bool _busy = false;
+  bool _pending = false;
   bool _pressed = false;
+  Timer? _release;
+  Timer? _loadingDelay;
+  DateTime? _pressedAt;
 
   Future<void> _run() async {
-    if (_busy || widget.loading || widget.onPressed == null) return;
-    setState(() => _busy = true);
+    if (_pending || widget.loading || widget.onPressed == null) return;
+    _pending = true;
+    _press(true);
+    _finishPress();
     try {
       if (widget.haptic) {
-        await context.appTheme.haptics.perform(AppHaptic.selection);
+        unawaited(context.appTheme.haptics.perform(AppHaptic.selection));
       }
-      await widget.onPressed!();
+      final result = widget.onPressed!();
+      if (result is Future<void>) {
+        // Fast route changes and local saves must not flash a loading surface.
+        _loadingDelay = Timer(context.appTheme.tokens.motion.overlay, () {
+          if (mounted && _pending) setState(() => _busy = true);
+        });
+        await result;
+      }
     } on Object catch (error, stack) {
       if (widget.onError case final handler?) {
         handler(error, stack);
@@ -87,12 +100,37 @@ class _AppButtonState extends State<AppButton> {
         );
       }
     } finally {
-      if (mounted) setState(() => _busy = false);
+      _pending = false;
+      _loadingDelay?.cancel();
+      if (mounted && _busy) setState(() => _busy = false);
     }
   }
 
   void _press(bool value) {
+    _release?.cancel();
+    if (value && !_pressed) _pressedAt = DateTime.now();
     if (_pressed != value) setState(() => _pressed = value);
+  }
+
+  void _finishPress() {
+    final elapsed = DateTime.now().difference(_pressedAt ?? DateTime.now());
+    final remaining =
+        context.appMotion(context.appTheme.motion.press) - elapsed;
+    _release?.cancel();
+    if (remaining > Duration.zero) {
+      _release = Timer(remaining, () {
+        if (mounted) _press(false);
+      });
+    } else {
+      _press(false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _release?.cancel();
+    _loadingDelay?.cancel();
+    super.dispose();
   }
 
   @override
@@ -106,15 +144,20 @@ class _AppButtonState extends State<AppButton> {
               _press((Offset.zero & box.size).contains(event.localPosition));
             }
           : null,
-      onPointerUp: (_) => _press(false),
+      onPointerUp: (_) => _finishPress(),
       onPointerCancel: (_) => _press(false),
       child: AnimatedScale(
-        scale: enabled && _pressed ? context.appTheme.motion.pressedScale : 1,
+        scale:
+            _pressed &&
+                widget.onPressed != null &&
+                !widget.loading &&
+                !MediaQuery.disableAnimationsOf(context)
+            ? context.appTheme.motion.pressedScale
+            : 1,
         duration: context.appMotion(context.appTheme.motion.press),
         child: FossButton(
           style: FossButtonStyle(
             minHeight: context.appTheme.dimensions.touchTarget,
-            shadow: const [],
           ),
           onPressed: enabled ? _run : null,
           loading: _busy || widget.loading,
@@ -482,5 +525,108 @@ class AppListTile extends StatelessWidget {
     leading: leading,
     trailing: trailing,
     onTap: onTap,
+    variant: _AppListGroupScope.maybeOf(context)
+        ? FossListTileVariant.plain
+        : FossListTileVariant.filled,
+    style: _AppListGroupScope.maybeOf(context)
+        ? const FossListTileStyle(borderRadius: 0)
+        : null,
   );
+}
+
+/// One surface for related rows, rounded only at the group's outer edges.
+class AppListGroup extends StatelessWidget {
+  /// Creates a small, eagerly laid out group. Use AppSliverListGroup for lists.
+  const AppListGroup({required this.children, super.key});
+
+  /// Related rows, normally AppListTile widgets.
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      for (var i = 0; i < children.length; i++)
+        _AppGroupedRow(
+          first: i == 0,
+          last: i == children.length - 1,
+          child: children[i],
+        ),
+    ],
+  );
+}
+
+/// Lazy grouped rows for a single CustomScrollView with scrolling headers.
+class AppSliverListGroup extends StatelessWidget {
+  /// Creates lazily built rows with continuous interior edges.
+  const AppSliverListGroup({
+    required this.itemCount,
+    required this.itemBuilder,
+    super.key,
+  });
+
+  /// Number of rows in this group.
+  final int itemCount;
+
+  /// Builds a row on demand.
+  final IndexedWidgetBuilder itemBuilder;
+
+  @override
+  Widget build(BuildContext context) => SliverList.builder(
+    itemCount: itemCount,
+    itemBuilder: (context, index) => _AppGroupedRow(
+      first: index == 0,
+      last: index == itemCount - 1,
+      child: itemBuilder(context, index),
+    ),
+  );
+}
+
+class _AppGroupedRow extends StatelessWidget {
+  const _AppGroupedRow({
+    required this.first,
+    required this.last,
+    required this.child,
+  });
+  final bool first;
+  final bool last;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.appTheme.tokens;
+    final radius = Radius.circular(t.radii.lg);
+    return ClipRSuperellipse(
+      borderRadius: BorderRadius.vertical(
+        top: first ? radius : Radius.zero,
+        bottom: last ? radius : Radius.zero,
+      ),
+      child: ColoredBox(
+        color: t.colors.card,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (!first)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: t.spacing(4)),
+                child: SizedBox(
+                  height: 1,
+                  child: ColoredBox(color: t.colors.border),
+                ),
+              ),
+            _AppListGroupScope(child: child),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AppListGroupScope extends InheritedWidget {
+  const _AppListGroupScope({required super.child});
+  static bool maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_AppListGroupScope>() != null;
+  @override
+  bool updateShouldNotify(_AppListGroupScope oldWidget) => false;
 }

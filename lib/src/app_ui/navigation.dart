@@ -1,12 +1,29 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fossui/src/app_ui/components.dart';
 import 'package:fossui/src/app_ui/foundation.dart';
 import 'package:fossui/src/app_ui/platform.dart';
+
+// Duration.zero AnimatedSize can dirty layout in the pinned SDK. Reduced motion
+// lays out the final geometry directly instead of running a zero-length ticker.
+Widget _animateChromeSize(
+  BuildContext context, {
+  required Widget child,
+  required AlignmentGeometry alignment,
+}) {
+  final duration = context.appMotion(context.appTheme.tokens.motion.overlay);
+  return duration == Duration.zero
+      ? child
+      : AnimatedSize(
+          duration: duration,
+          curve: Curves.easeOutCubic,
+          alignment: alignment,
+          child: child,
+        );
+}
 
 /// Whether navigation reserves reachable scroll space or covers content.
 enum AppNavigationMode {
@@ -80,15 +97,19 @@ class AppTopBar extends StatelessWidget {
             ),
           ],
         ),
-        child: ClipRSuperellipse(
-          borderRadius: BorderRadius.circular(999),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: IconTheme.merge(
-              data: const IconThemeData(size: 20),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: items.map(_button).toList(),
+        child: _animateChromeSize(
+          context,
+          alignment: AlignmentDirectional.centerEnd,
+          child: ClipRSuperellipse(
+            borderRadius: BorderRadius.circular(999),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: IconTheme.merge(
+                data: const IconThemeData(size: 20),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: items.map(_button).toList(),
+                ),
               ),
             ),
           ),
@@ -162,15 +183,20 @@ class AppScaffold extends StatelessWidget {
             media.viewInsets.bottom == 0 &&
             navigationMode == AppNavigationMode.reservedSpace
         ? math.max(
-            theme.dimensions.navigationExtent,
-            navigation is AppNavigationBar
-                ? AppNavigationBar.heightOf(context) + theme.tokens.spacing(6)
-                : 0.0,
-          )
-        : 0.0;
+                theme.dimensions.navigationExtent,
+                navigation is AppNavigationBar
+                    ? AppNavigationBar.heightOf(context) +
+                          theme.tokens.spacing(6)
+                    : 0.0,
+              ) +
+              media.padding.bottom
+        : media.viewInsets.bottom > 0
+        ? 0.0
+        : media.padding.bottom;
     return ColoredBox(
       color: theme.tokens.colors.background,
       child: SafeArea(
+        bottom: false,
         child: Padding(
           padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
           child: Stack(
@@ -194,7 +220,7 @@ class AppScaffold extends StatelessWidget {
               ),
               if (navigation != null && media.viewInsets.bottom == 0)
                 Positioned(
-                  bottom: theme.tokens.spacing(3),
+                  bottom: media.padding.bottom + theme.tokens.spacing(3),
                   left: theme.tokens.spacing(4),
                   right: theme.tokens.spacing(4),
                   child: navigation!,
@@ -268,68 +294,83 @@ class AppNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.appTheme.tokens;
-    final highContrast = MediaQuery.highContrastOf(context);
     final wide = MediaQuery.sizeOf(context).width >= 600;
-    final height = heightOf(context);
+    final duration = context.appMotion(t.motion.overlay);
     return Align(
       alignment: Alignment.bottomCenter,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: DecoratedBox(
           decoration: ShapeDecoration(
-            shape: const StadiumBorder(),
+            color: t.colors.card,
+            shape: StadiumBorder(side: BorderSide(color: t.colors.border)),
             shadows: [
               BoxShadow(
-                color: const Color(0xFF000000).withValues(alpha: 0.10),
-                blurRadius: 24,
-                offset: const Offset(0, 6),
+                color: t.colors.foreground.withValues(alpha: 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: ClipPath(
-            clipper: const ShapeBorderClipper(shape: StadiumBorder()),
-            child: BackdropFilter(
-              filter: ui.ImageFilter.blur(
-                sigmaX: highContrast ? 0 : 20,
-                sigmaY: highContrast ? 0 : 20,
-              ),
-              child: DecoratedBox(
-                decoration: ShapeDecoration(
-                  color: t.colors.card.withValues(
-                    alpha: highContrast ? 1 : 0.94,
-                  ),
-                  shape: StadiumBorder(
-                    side: BorderSide(color: t.colors.border),
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(6),
-                  child: SizedBox(
-                    height: height - 12,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: _animateChromeSize(
+            context,
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: SizedBox(
+                height: heightOf(context) - 12,
+                child: LayoutBuilder(
+                  builder: (context, limits) {
+                    final cellWidth = limits.maxWidth / items.length;
+                    return Stack(
+                      fit: StackFit.expand,
                       children: [
-                        for (var i = 0; i < items.length; i++)
-                          Expanded(
-                            child: _NavigationDestination(
-                              item: items[i],
-                              selected: selectedIndex == i,
-                              horizontal: wide,
-                              onActivate: () {
-                                onSelected(i);
-                                if (haptic && i != selectedIndex) {
-                                  unawaited(
-                                    context.appTheme.haptics.perform(
-                                      AppHaptic.selection,
-                                    ),
-                                  );
-                                }
-                              },
+                        AnimatedPositionedDirectional(
+                          key: const ValueKey('app-navigation-indicator'),
+                          duration: duration,
+                          curve: Curves.easeOutCubic,
+                          start: cellWidth * selectedIndex,
+                          width: cellWidth,
+                          top: 0,
+                          bottom: 0,
+                          child: IgnorePointer(
+                            child: DecoratedBox(
+                              key: const ValueKey(
+                                'app-navigation-indicator-surface',
+                              ),
+                              decoration: ShapeDecoration(
+                                color: t.colors.accent,
+                                shape: const StadiumBorder(),
+                              ),
                             ),
                           ),
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (var i = 0; i < items.length; i++)
+                              Expanded(
+                                child: _NavigationDestination(
+                                  item: items[i],
+                                  selected: selectedIndex == i,
+                                  horizontal: wide,
+                                  onActivate: () {
+                                    onSelected(i);
+                                    if (haptic && i != selectedIndex) {
+                                      unawaited(
+                                        context.appTheme.haptics.perform(
+                                          AppHaptic.selection,
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                          ],
+                        ),
                       ],
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -338,6 +379,83 @@ class AppNavigationBar extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Crossfades persistent destinations. Only the active page accepts input.
+class AppNavigationBody extends StatefulWidget {
+  /// Creates a persistent page stack for [index].
+  const AppNavigationBody({
+    required this.index,
+    required this.children,
+    super.key,
+  }) : assert(
+         index >= 0 && index < children.length,
+         'Index must name a child.',
+       );
+
+  /// Active destination.
+  final int index;
+
+  /// Stable destination widgets, in navigation order.
+  final List<Widget> children;
+
+  @override
+  State<AppNavigationBody> createState() => _AppNavigationBodyState();
+}
+
+class _AppNavigationBodyState extends State<AppNavigationBody> {
+  Timer? _settle;
+  bool _transitioning = false;
+
+  @override
+  void didUpdateWidget(AppNavigationBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.index == widget.index) return;
+    _settle?.cancel();
+    final duration = context.appMotion(context.appTheme.tokens.motion.overlay);
+    _transitioning = duration > Duration.zero;
+    if (_transitioning) {
+      _settle = Timer(duration, () {
+        if (mounted) setState(() => _transitioning = false);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _settle?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    fit: StackFit.expand,
+    children: [
+      for (var i = 0; i < widget.children.length; i++)
+        Offstage(
+          key: ValueKey(i),
+          offstage: i != widget.index && !_transitioning,
+          child: AnimatedOpacity(
+            opacity: i == widget.index ? 1 : 0,
+            duration: context.appMotion(context.appTheme.tokens.motion.overlay),
+            curve: Curves.easeInOut,
+            child: IgnorePointer(
+              ignoring: i != widget.index,
+              child: ExcludeSemantics(
+                excluding: i != widget.index,
+                child: ExcludeFocus(
+                  excluding: i != widget.index,
+                  child: TickerMode(
+                    enabled: i == widget.index,
+                    child: widget.children[i],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+    ],
+  );
 }
 
 class _NavigationDestination extends StatefulWidget {
@@ -443,8 +561,6 @@ class _NavigationDestinationState extends State<_NavigationDestination> {
               decoration: ShapeDecoration(
                 color: _pressed
                     ? t.colors.primary.withValues(alpha: 0.18)
-                    : widget.selected
-                    ? t.colors.accent
                     : _hovered
                     ? t.colors.secondary
                     : const Color(0x00000000),

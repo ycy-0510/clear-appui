@@ -58,6 +58,40 @@ AppTopBar(
 Use the existing `AppNavigationBar` for floating bottom destinations. Top action
 groups and bottom destinations serve different purposes.
 
+## Motion and continuity
+
+HIG informs interaction behavior; it does not require an iOS visual clone.
+Keep FossUI's token-based surfaces, button depth and short press feedback.
+AppButton maintains visible feedback for a quick tap and keyboard activation;
+it gates pending work immediately and only shows a loading state for sustained
+work, avoiding flashes for quick local actions. Activation never waits for motion.
+
+AppNavigationBar owns one persistent selection surface. It slides and resizes
+instead of toggling separate selected backgrounds. AppTopBar groups and bottom
+chrome animate geometry changes. Rapid changes retarget the current animation.
+AppNavigationBody crossfades stable destinations and excludes outgoing pages
+from input, focus and semantics. Reduce Motion lays out final geometry directly.
+
+## Scrolling and groups
+
+Preserve the host app's destinations, settings entry points, search modes and
+scroll boundaries during migration. Do not move settings into bottom navigation
+or pin an originally scrolling search/filter area without an explicit redesign.
+
+AppScaffold lets the body extend behind floating bottom controls to the device
+edge. Its MediaQuery bottom padding represents the navigation and device inset;
+consume it as trailing scroll content. Do not use a bottom SafeArea to reduce
+the viewport above the floating bar. The final row must scroll fully above it.
+For a page that scrolls as one unit, use CustomScrollView, SliverToBoxAdapter
+for headers/filters and AppSliverListGroup for lazy results. Avoid nested vertical
+scroll views and eager building of an entire dictionary.
+
+AppListGroup composes a small group; AppSliverListGroup builds a long group lazily.
+Use AppListTile inside them: the group supplies one continuous card surface,
+only the first/last exterior corners and interior dividers. Standalone tiles
+retain FossUI's independent filled-row appearance. Use FossTabs for segmented
+search modes; it already provides a continuous moving indicator.
+
 ## Typography and spacing
 
 AppTheme adapts FossTheme's existing typography tokens. Its default logical sizes
@@ -82,3 +116,5 @@ Keep normal light/dark previews at ordinary text scaling. Label larger-text test
 separately. Verify floating controls, narrow/wide layouts, keyboard/cancel,
 error/retry, title alignment and last-item reachability. A browser preview does
 not establish native VoiceOver, gesture or performance acceptance.
+Check animation midpoints, quick reversals, resizing, reduced motion, grouped
+middle-row edges, header scrolling and the last result above navigation.

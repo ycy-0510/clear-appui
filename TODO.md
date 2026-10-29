@@ -213,3 +213,18 @@
 - [x] AppUI 26 項通過，涵蓋分組、RTL、觸控／鍵盤／取消與窄版；兩張產品 Golden 已更新並重跑通過。
 - [x] 發布 Git 修訂 `324b24b`、透過 NPX 重新安裝 BIOCAB Skill；doctor 確認完全匹配。
 - [x] Skill／設計文件補上品牌遷移規則：原版配色、標誌、launcher／啟動畫面；以既有 retheme API 集中映射，保留共用字級與互動。
+
+
+## 互動連續性與原版遷移修正（2026-10-29）
+
+- [x] 上游 FossTabs 已有連續指示器；保留並要求搜尋分段重用。
+- [x] AppNavigationBar 改為同一個 indicator 移動／縮放；快速反向不跳回起點。
+- [x] AppTopBar 群組與底部容器尺寸動畫；Reduce Motion 直接使用最終幾何。
+- [x] AppButton 恢復 Foss 層次、快速點按／鍵盤回饋、立即防重與延遲 loading 顯示。
+- [x] AppNavigationBody 保留分頁狀態並交叉淡化；離開頁面不可點按／聚焦／朗讀。
+- [x] AppScaffold 底部 viewport 延伸到裝置邊緣，尾端 scroll padding 避開導航與系統 inset。
+- [x] AppListGroup／AppSliverListGroup：只有群組外緣圓角，中間平直、分隔線、lazy rows。
+- [x] Skill／文件要求保留原版 navigation、設定入口、搜尋模式與捲動範圍，HIG 不當成 iOS 皮膚。
+- [x] AppUI 38 項測試通過，含動畫中間影格／反向、RTL、Reduce Motion、鍵盤／取消、底部避讓、群組與 lazy scrolling；兩張 CI 視覺圖已更新及檢視。
+- [ ] 完成消費端升級與 NPX Skill 重新安裝後的 doctor／預覽驗證。
+- [ ] 新版實機動畫、VoiceOver 與效能驗收；不以 Widget tests／Preview 取代。

@@ -1,5 +1,10 @@
 ## Unreleased
 
+- Animate one persistent navigation indicator and floating control geometry;
+  retain destination state with AppNavigationBody and improve brief button feedback.
+- Add AppListGroup/AppSliverListGroup with continuous interior rows; let page
+  content scroll beneath bottom chrome while advertising trailing clearance.
+- Require source-faithful destinations, search modes and scrolling in migration skills.
 - Document host-brand preservation and a single semantic theme adapter in the
   portable skill, including native launcher and launch-screen assets.
 - Add AppTopBar with a floating leading control and one shared trailing action

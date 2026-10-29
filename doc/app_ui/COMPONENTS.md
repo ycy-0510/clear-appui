@@ -8,9 +8,9 @@ the existing `Foss*` APIs through `package:fossui/fossui.dart`.
 | Area | APIs | Implementation |
 | --- | --- | --- |
 | Theme | AppTheme, AppThemeData, AppDimensions, AppMotion, AppSheetStyle | [foundation.dart](../../lib/src/app_ui/foundation.dart) |
-| Controls | AppButton, AppText, AppIcon, AppCard, AppBadge, AppTextField, AppCheckbox, AppSwitch, AppListTile, AppEmptyState | [components.dart](../../lib/src/app_ui/components.dart) |
+| Controls | AppButton, AppText, AppIcon, AppCard, AppBadge, AppTextField, AppCheckbox, AppSwitch, AppListTile, AppListGroup, AppSliverListGroup, AppEmptyState | [components.dart](../../lib/src/app_ui/components.dart) |
 | Layout | AppLayoutEnvironment, AppAdaptiveLayout, AppConstrainedContent, AppAdaptiveGrid | [layout.dart](../../lib/src/app_ui/layout.dart) |
-| Navigation | AppScaffold, AppTopBar, AppTopBarAction, AppNavigationBar, AppNavigationItem | [navigation.dart](../../lib/src/app_ui/navigation.dart) |
+| Navigation | AppScaffold, AppTopBar, AppTopBarAction, AppNavigationBar, AppNavigationItem, AppNavigationBody | [navigation.dart](../../lib/src/app_ui/navigation.dart) |
 | Presentation | AppPresentationHost, AppSheet, AppSheetController, AppSheetDetent, AppPopover, showAppSheet | [presentation.dart](../../lib/src/app_ui/presentation.dart) |
 | Drag and drop | AppDragCoordinator, AppDragScope, AppDraggable, AppDropTarget | [interaction.dart](../../lib/src/app_ui/interaction.dart) |
 | Picker | AppDatePicker | [pickers.dart](../../lib/src/app_ui/pickers.dart) |
@@ -40,7 +40,13 @@ MediaQuery. Default lists consume it; custom list padding must preserve it.
 
 AppNavigationBar activates destinations synchronously. A full destination cell
 is interactive, and optional haptics run without delaying selection. Preserve
-screen state when composing tab contents.
+screen state with AppNavigationBody. Its page crossfades do not delay selection.
+The bar uses one persistent moving indicator, with reduced-motion support.
+
+AppListGroup supplies one continuous surface for small groups of AppListTile rows.
+Use AppSliverListGroup in CustomScrollView for lazy results below scrolling headers;
+apply advertised bottom padding as trailing scroll content. Only group exterior
+edges are rounded, with flat interior rows and dividers.
 
 ## Lower-level components
 

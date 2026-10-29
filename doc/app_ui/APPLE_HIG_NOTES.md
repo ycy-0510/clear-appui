@@ -6,6 +6,8 @@ Reviewed 2026-10-29 from Apple's official documentation:
 - [Materials](https://developer.apple.com/design/human-interface-guidelines/materials)
 - [Tab bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars)
 - [Accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility)
+- [Motion](https://developer.apple.com/design/human-interface-guidelines/motion)
+- [Scroll views](https://developer.apple.com/design/human-interface-guidelines/scroll-views)
 - [Adopting Liquid Glass](https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass)
 - [WWDC25: Build a UIKit app with the new design, Presentations at 13:31](https://developer.apple.com/videos/play/wwdc2025/284/)
 
@@ -75,3 +77,18 @@ aligned 20-pixel page insets and a bounded floating bar instead of repeated
 oversized cards. These are product design choices informed by HIG, not Apple's
 certification or exact native metrics. The Mac window demonstrates iOS-style
 components; it is not a native AppKit tab view or native Liquid Glass renderer.
+
+## Continuous interaction and scrolling
+
+The motion review applies brief, purposeful feedback and predictable transitions,
+while preserving FossUI's visual language. One moving navigation indicator and
+animated control-group geometry preserve visual identity across changes; Reduce
+Motion removes travel. Quick actions do not flash loading states or wait for
+animation. These implementation choices follow HIG principles, not a prescribed
+Apple animation duration or native material.
+
+The scroll review avoids nested same-direction scroll views. A page whose header,
+search and results scroll together uses one sliver viewport. The viewport can
+extend under floating controls; trailing scroll padding lets the last row clear
+both controls and device insets. Grouped lists round only exterior group corners.
+HIG references do not authorize changing the host app's information architecture.

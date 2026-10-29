@@ -30,6 +30,9 @@ contract is an error: use the package's bundled skill rather than guessing.
 
 ## Compose with the library
 
+- For migrations, map the maintained app's destinations, settings entry points,
+  search modes and scroll boundaries before composing screens. Preserve that
+  information architecture; adopting the library does not authorize a redesign.
 - Put `AppTheme` below the application's shell. Read semantic values from
   `context.appTheme.tokens`; use `dimensions`, `motion`, and `sheet` for product
   overrides. AppTheme adapts FossTheme; keep this single token source.
@@ -50,7 +53,18 @@ contract is an error: use the package's bundled skill rather than guessing.
   leave the space between groups unpainted, and use the opaque library surface.
   Do not create a separate floating tile for every trailing icon or add glass/blur.
 - Use AppScaffold and AppNavigationBar for product page chrome. Preserve bottom
-  content reachability using the scaffold's advertised MediaQuery padding.
+  content reachability using the scaffold's advertised MediaQuery padding as
+  trailing scroll space. Do not shrink the viewport above floating navigation or
+  use bottom SafeArea to cut off scrolling content. Put scrolling headers,
+  search/filter controls and lazy results in one CustomScrollView when the
+  original page scrolls as a unit; use SliverToBoxAdapter and AppSliverListGroup.
+- Use AppNavigationBody to retain destination state during a crossfade. The
+  bar has one persistent sliding selection surface; floating control groups
+  animate size changes. Keep callbacks immediate and support rapid reversal.
+- Use AppListGroup for small groups and AppSliverListGroup for long ones, with
+  AppListTile rows. Only the outer group edges are rounded; inner rows share
+  the surface with dividers and no per-row corner cutouts. For segmented search
+  modes, reuse FossTabs and its existing sliding indicator.
 - Put AppPresentationHost inside the relevant route. Present sheets through
   showAppSheet; connect the supplied ScrollController to the sheet body. Share
   that host's drag coordinator across page and sheet. Read the implementation
@@ -76,6 +90,13 @@ Maintain consistent spacing and concentric shapes. Avoid rebuilding the library'
 navigation, sheet material or gesture handling in individual screens. The Flutter
 sheet is an approximation of Apple's materials; verify platform-specific behavior
 on the actual target when needed.
+
+Apply HIG as interaction guidance, not an iOS skin. Preserve FossUI's themed
+surfaces, depth and brief press feedback. Moving or resizing an existing object
+should interpolate from its current visual state, not replace it with unrelated
+flashing surfaces. Respect Reduce Motion and do not delay actions until an
+animation ends. Test intermediate frames and interrupted transitions, not only
+the final settled state.
 
 ## Verify the requested behavior
 
