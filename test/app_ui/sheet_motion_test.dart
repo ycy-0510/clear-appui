@@ -161,4 +161,34 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(AppSheet), findsNothing);
   });
+  testWidgets('minimum sheet dismisses from an iOS bouncing body pull', (
+    tester,
+  ) async {
+    await boot(tester);
+    unawaited(
+      showAppSheet<void>(
+        context: pageContext,
+        builder: (_) => AppSheet(
+          initialDetent: const AppSheetDetent.fraction(.3),
+          builder: (_, scroll) => ListView(
+            controller: scroll,
+            physics: const BouncingScrollPhysics(),
+            children: const [SizedBox(height: 1200)],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(ListView)),
+    );
+    await gesture.moveBy(const Offset(0, 30));
+    await tester.pump();
+    await gesture.moveBy(const Offset(0, 90));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.byType(AppSheet), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 }

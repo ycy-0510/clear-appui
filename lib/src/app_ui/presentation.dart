@@ -200,9 +200,12 @@ class AppPresentationHostState extends State<AppPresentationHost>
                           excluding: entry.closing,
                           child: _PresentationEntryScope(
                             animation: entry.animation,
-                            child: FocusScope(
-                              autofocus: true,
-                              child: Builder(builder: entry.builder),
+                            child: ExcludeFocus(
+                              excluding: entry.closing,
+                              child: FocusScope(
+                                autofocus: true,
+                                child: Builder(builder: entry.builder),
+                              ),
                             ),
                           ),
                         ),
@@ -713,9 +716,15 @@ class _AppSheetState extends State<AppSheet>
                           _bodyDragging = true;
                           _sheet._interrupt();
                         }
-                        if (notification is OverscrollNotification &&
-                            notification.dragDetails != null &&
-                            notification.overscroll < 0 &&
+                        final pullingPastTop =
+                            notification is OverscrollNotification &&
+                                notification.dragDetails != null &&
+                                notification.overscroll < 0 ||
+                            notification is ScrollUpdateNotification &&
+                                notification.dragDetails != null &&
+                                notification.metrics.pixels <
+                                    notification.metrics.minScrollExtent;
+                        if (pullingPastTop &&
                             _sheet.extent <= sizes.first + 0.01 &&
                             _bodyTravel > theme.dimensions.touchTarget &&
                             widget.dismissible) {
