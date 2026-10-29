@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
+import 'package:flutter/gestures.dart'
+    show DragStartBehavior, kMinFlingVelocity;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fossui/fossui.dart';
@@ -36,7 +38,7 @@ class AppPresentationHost extends StatefulWidget {
 
 /// Controller owned by an AppPresentationHost.
 class AppPresentationHostState extends State<AppPresentationHost>
-    with WidgetsBindingObserver {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   final _entries = <_Presentation>[];
   final _drag = AppDragCoordinator();
 
@@ -62,10 +64,15 @@ class AppPresentationHostState extends State<AppPresentationHost>
       dismissible: dismissible,
       barrierLabel: barrierLabel,
       previousFocus: FocusManager.instance.primaryFocus,
+      animation: AnimationController(
+        vsync: this,
+        duration: context.appMotion(context.appTheme.tokens.motion.overlay),
+      ),
     );
     entry.history = LocalHistoryEntry(onRemove: () => _close(entry));
     ModalRoute.of(context)?.addLocalHistoryEntry(entry.history!);
     setState(() => _entries.add(entry));
+    entry.animation.forward();
     return entry.result.future.then((value) => value as T?);
   }
 
@@ -75,13 +82,31 @@ class AppPresentationHostState extends State<AppPresentationHost>
   }
 
   void _close(_Presentation entry, [Object? result]) {
-    if (!_entries.contains(entry)) return;
+    if (!_entries.contains(entry) || entry.closing) return;
     _drag.cancel();
+    setState(() => entry.closing = true);
+    entry.history?.remove();
+    unawaited(_finishClosing(entry, result));
+  }
+
+  Future<void> _finishClosing(_Presentation entry, Object? result) async {
+    try {
+      await entry.animation.reverse().orCancel;
+    } on TickerCanceled {
+      return; // Route disposal or backgrounding already completed the result.
+    }
+    if (mounted && _entries.contains(entry)) _remove(entry, result);
+  }
+
+  void _remove(_Presentation entry, [Object? result]) {
+    if (!_entries.contains(entry)) return;
+    final wasTop = identical(_entries.last, entry);
     setState(() => _entries.remove(entry));
+    entry.animation.dispose();
     entry.history?.remove();
     if (!entry.result.isCompleted) entry.result.complete(result);
     final focus = entry.previousFocus;
-    if (focus?.context != null) focus!.requestFocus();
+    if (mounted && wasTop && focus?.context != null) focus!.requestFocus();
   }
 
   @override
@@ -90,7 +115,7 @@ class AppPresentationHostState extends State<AppPresentationHost>
         state == AppLifecycleState.detached ||
         state == AppLifecycleState.hidden) {
       _drag.cancel();
-      _entries.toList().reversed.forEach(_close);
+      _entries.toList().reversed.forEach(_remove);
     }
   }
 
@@ -101,6 +126,7 @@ class AppPresentationHostState extends State<AppPresentationHost>
     final entries = _entries.toList();
     _entries.clear();
     for (final entry in entries) {
+      entry.animation.dispose();
       entry.history?.remove();
       if (!entry.result.isCompleted) entry.result.complete();
     }
@@ -138,7 +164,10 @@ class AppPresentationHostState extends State<AppPresentationHost>
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  ExcludeFocus(excluding: modal, child: widget.child),
+                  ExcludeSemantics(
+                    excluding: modal,
+                    child: ExcludeFocus(excluding: modal, child: widget.child),
+                  ),
                   for (final entry in _entries) ...[
                     if (entry.modal)
                       Positioned.fill(
@@ -153,16 +182,30 @@ class AppPresentationHostState extends State<AppPresentationHost>
                               onTap: entry.dismissible
                                   ? () => _close(entry)
                                   : null,
-                              child: const ColoredBox(color: Color(0x52000000)),
+                              child: FadeTransition(
+                                opacity: entry.animation,
+                                child: const ColoredBox(
+                                  color: Color(0x52000000),
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
                     Positioned.fill(
                       key: entry.key,
-                      child: FocusScope(
-                        autofocus: true,
-                        child: Builder(builder: entry.builder),
+                      child: IgnorePointer(
+                        ignoring: entry.closing,
+                        child: ExcludeSemantics(
+                          excluding: entry.closing,
+                          child: _PresentationEntryScope(
+                            animation: entry.animation,
+                            child: FocusScope(
+                              autofocus: true,
+                              child: Builder(builder: entry.builder),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -183,15 +226,32 @@ class _Presentation {
     required this.dismissible,
     required this.barrierLabel,
     required this.previousFocus,
+    required this.animation,
   });
   final WidgetBuilder builder;
   final bool modal;
   final bool dismissible;
   final String barrierLabel;
   final FocusNode? previousFocus;
+  final AnimationController animation;
+  bool closing = false;
   final key = UniqueKey();
   final result = Completer<Object?>();
   LocalHistoryEntry? history;
+}
+
+class _PresentationEntryScope extends InheritedWidget {
+  const _PresentationEntryScope({
+    required this.animation,
+    required super.child,
+  });
+  final Animation<double> animation;
+  static Animation<double>? maybeOf(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<_PresentationEntryScope>()
+      ?.animation;
+  @override
+  bool updateShouldNotify(_PresentationEntryScope oldWidget) =>
+      animation != oldWidget.animation;
 }
 
 class _PresentationScope extends InheritedWidget {
@@ -375,6 +435,8 @@ class _AppSheetState extends State<AppSheet>
   late AppSheetController _sheet;
   late final AnimationController _animation;
   double _dismissTravel = 0;
+  double _bodyTravel = 0;
+  bool _bodyDragging = false;
   @override
   void initState() {
     super.initState();
@@ -415,7 +477,7 @@ class _AppSheetState extends State<AppSheet>
     var target = sizes.reduce(
       (a, b) => (a - size).abs() < (b - size).abs() ? a : b,
     );
-    if (velocity.abs() > 700) {
+    if (velocity.abs() > kMinFlingVelocity) {
       final options = sizes.where(
         (s) => velocity < 0 ? s > size + 0.01 : s < size - 0.01,
       );
@@ -484,6 +546,7 @@ class _AppSheetState extends State<AppSheet>
               children: [
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
+                  dragStartBehavior: DragStartBehavior.down,
                   onVerticalDragStart: dragging
                       ? null
                       : (_) {
@@ -495,9 +558,10 @@ class _AppSheetState extends State<AppSheet>
                       : (event) {
                           if (!_sheet.isAttached) return;
                           final next = _sheet.extent - event.delta.dy / height;
-                          _dismissTravel = next <= sizes.first
-                              ? _dismissTravel + event.delta.dy
-                              : 0;
+                          _dismissTravel = math.max(
+                            0,
+                            _dismissTravel + event.delta.dy,
+                          );
                           _sheet._controller.jumpTo(
                             next.clamp(sizes.first, sizes.last),
                           );
@@ -509,7 +573,9 @@ class _AppSheetState extends State<AppSheet>
                       ? null
                       : (event) {
                           if (widget.dismissible &&
-                              _dismissTravel > theme.dimensions.touchTarget) {
+                              _sheet.extent <= sizes.first + 0.01 &&
+                              (_dismissTravel > theme.dimensions.touchTarget ||
+                                  (event.primaryVelocity ?? 0) > 700)) {
                             AppPresentationHost.of(context).close();
                           } else {
                             unawaited(
@@ -629,7 +695,38 @@ class _AppSheetState extends State<AppSheet>
                     ],
                   ),
                 ),
-                Expanded(child: body!),
+                Expanded(
+                  child: Listener(
+                    onPointerDown: (_) {
+                      _bodyTravel = 0;
+                      _bodyDragging = true;
+                    },
+                    onPointerUp: (_) => _bodyDragging = false,
+                    onPointerMove: (event) =>
+                        _bodyTravel = math.max(0, _bodyTravel + event.delta.dy),
+                    onPointerCancel: (_) => _bodyDragging = false,
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (notification) {
+                        if (notification.depth != 0) return false;
+                        if (notification is ScrollStartNotification &&
+                            notification.dragDetails != null) {
+                          _bodyDragging = true;
+                          _sheet._interrupt();
+                        }
+                        if (notification is OverscrollNotification &&
+                            notification.dragDetails != null &&
+                            notification.overscroll < 0 &&
+                            _sheet.extent <= sizes.first + 0.01 &&
+                            _bodyTravel > theme.dimensions.touchTarget &&
+                            widget.dismissible) {
+                          AppPresentationHost.of(context).close();
+                        }
+                        return false;
+                      },
+                      child: body!,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -639,15 +736,17 @@ class _AppSheetState extends State<AppSheet>
           padding: EdgeInsets.only(left: margin, right: margin, bottom: margin),
           child: ClipRSuperellipse(
             borderRadius: corners,
-            child: opacity >= 1
-                ? content
-                : BackdropFilter(
-                    filter: ImageFilter.blur(
-                      sigmaX: style.blurSigma,
-                      sigmaY: style.blurSigma,
-                    ),
-                    child: content,
-                  ),
+            // Keep the gesture subtree mounted when a full-height opaque panel
+            // becomes translucent. Inserting a new filter parent here cancels
+            // the first active drag as soon as the panel leaves full height.
+            child: BackdropFilter(
+              enabled: opacity < 1 && style.blurSigma > 0,
+              filter: ImageFilter.blur(
+                sigmaX: style.blurSigma,
+                sigmaY: style.blurSigma,
+              ),
+              child: content,
+            ),
           ),
         );
       },
@@ -677,8 +776,16 @@ class _AppSheetState extends State<AppSheet>
             .._min = sizes.first
             .._max = sizes.last
             .._duration = context.appMotion(theme.tokens.motion.drawer);
-          return Align(
-            alignment: Alignment.bottomCenter,
+          final panel = NotificationListener<DraggableScrollableNotification>(
+            onNotification: (notification) {
+              if (_bodyDragging &&
+                  widget.dismissible &&
+                  _bodyTravel > theme.dimensions.touchTarget &&
+                  notification.extent <= sizes.first + 0.01) {
+                AppPresentationHost.of(context).close();
+              }
+              return false;
+            },
             child: DraggableScrollableSheet(
               controller: _sheet._controller,
               initialChildSize: widget.initialDetent
@@ -693,6 +800,25 @@ class _AppSheetState extends State<AppSheet>
               builder: (context, scroll) =>
                   _surface(context, scroll, sizes, height),
             ),
+          );
+          final animation = _PresentationEntryScope.maybeOf(context);
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: animation == null
+                ? panel
+                : SlideTransition(
+                    key: const ValueKey('app-sheet-presentation'),
+                    position:
+                        Tween<Offset>(
+                          begin: const Offset(0, 1),
+                          end: Offset.zero,
+                        ).animate(
+                          CurveTween(
+                            curve: Curves.easeOutCubic,
+                          ).animate(animation),
+                        ),
+                    child: panel,
+                  ),
           );
         },
       ),

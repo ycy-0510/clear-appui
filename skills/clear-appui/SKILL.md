@@ -39,7 +39,11 @@ contract is an error: use the package's bundled skill rather than guessing.
 - When migrating a branded app, inspect its maintained palette, logos, functional
   icons, launcher icons and launch screen first. Map those colors once with
   `AppThemeData.light/dark.copyWith(tokens: base.tokens.retheme(FossThemeSpec(...)))`;
-  retain the package's typography, spacing and controls. The blue presets are
+  retain the package's typography, spacing and controls. Brand color is an
+  emphasis role, not permission to tint the canvas, text, cards, fields and every
+  secondary surface. Preserve neutral library surfaces unless the user explicitly
+  requests branded backgrounds; scope overrides to primary/on-primary/focus roles.
+  The blue presets are
   fallbacks, not a replacement for the host brand. Reuse original artwork and
   synchronize Cupertino/Material shell colors with the same semantic tokens.
 - Use AppButton, AppText, AppCard, AppTextField, AppBadge, AppCheckbox,
@@ -71,7 +75,11 @@ contract is an error: use the package's bundled skill rather than guessing.
   modes, reuse FossTabs and its existing sliding indicator.
 - Put AppPresentationHost inside the relevant route. Present sheets through
   showAppSheet; connect the supplied ScrollController to the sheet body. Share
-  that host's drag coordinator across page and sheet. Read the implementation
+  that host's drag coordinator across page and sheet. The host owns animated
+  entry/exit and waits for exit before completing results. Keep the gesture subtree
+  mounted when material changes; toggling a blur parent can cancel the first drag.
+  Verify the first continuous pull from full height through translucent detents.
+  Read the implementation
   before adding nested presentations or drag behaviors.
 - Prefer AppAdaptiveLayout, AppAdaptiveGrid and AppConstrainedContent for
   constrained layouts. Base adaptation on available space.

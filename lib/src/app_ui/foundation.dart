@@ -122,13 +122,8 @@ class AppThemeData {
     tokens: _productTokens(
       FossThemeData.light.retheme(
         const FossThemeSpec(
-          background: Color(0xFFF2F2F7),
-          foreground: Color(0xFF1C1C1E),
-          cardForeground: Color(0xFF1C1C1E),
           primary: Color(0xFF0060D6),
           primaryForeground: Color(0xFFFFFFFF),
-          accent: Color(0x0F0060D6),
-          accentForeground: Color(0xFF0060D6),
           ring: Color(0xFF0060D6),
           radius: 14,
         ),
@@ -146,8 +141,6 @@ class AppThemeData {
           popover: Color(0xFF2C2C2E),
           primary: Color(0xFF80B8FF),
           primaryForeground: Color(0xFF071B36),
-          accent: Color(0x1F80B8FF),
-          accentForeground: Color(0xFF80B8FF),
           ring: Color(0xFF80B8FF),
           mutedForeground: Color(0xFF98989F),
           radius: 14,

@@ -1,5 +1,10 @@
 ## Unreleased
 
+- Animate shared sheet entrance/exit and retain gesture identity across opaque
+  and frosted materials, fixing interrupted first pulls from full height.
+- Preserve white/neutral FossUI surfaces; brand emphasis no longer implies a
+  tinted page, secondary fills or body text in the portable skill.
+
 - Restore brief navigation press-scale feedback for quick taps and keyboard
   activation; remove competing pressed fills and use FossTabs' selection easing.
 

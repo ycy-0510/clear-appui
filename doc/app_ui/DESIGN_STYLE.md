@@ -18,16 +18,16 @@ final branded = base.copyWith(
     const FossThemeSpec(
       primary: brandPrimary,
       primaryForeground: onBrandPrimary,
-      accent: brandSelectionSurface,
-      accentForeground: brandPrimary,
       ring: brandPrimary,
     ),
   ),
 );
 ```
 
-Import `FossThemeSpec` from `package:fossui/fossui.dart`. Map background, content,
-surface and border roles as needed, with a corresponding dark palette. Feed the
+Import `FossThemeSpec` from `package:fossui/fossui.dart`. Keep neutral background, content,
+surface and border roles unless a branded canvas is explicitly requested.
+The light default preserves FossUI's white canvas and neutral secondary fills;
+brand emphasis normally overrides primary, on-primary and focus roles only. Feed the
 same tokens into the Cupertino/Material shell. Product artwork belongs to the
 host app; shared component styling belongs to this package. Check logo contrast
 without recoloring supplied artwork, and verify native launch resources separately
@@ -132,3 +132,14 @@ error/retry, title alignment and last-item reachability. A browser preview does
 not establish native VoiceOver, gesture or performance acceptance.
 Check animation midpoints, quick reversals, resizing, reduced motion, grouped
 middle-row edges, header scrolling and the last result above navigation.
+
+
+## Sheet continuity
+
+The route's presentation host animates sheet entry and exit with a matching
+barrier transition. Results complete after exit; interruption reverses the
+current animation. Reduced Motion uses final geometry. Backgrounding and route
+disposal complete outstanding results immediately. Sheet surfaces keep a stable
+BackdropFilter parent, toggling its enabled state as opacity changes; replacing
+that parent at full height disposes the active gesture and causes a failed first
+pull. A continuous downward pull can resize and dismiss from the handle or body.
