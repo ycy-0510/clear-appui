@@ -288,3 +288,12 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] 新增 AppCard onTap／semanticLabel，重用 AppButton 按壓及穩定點擊區；巢狀 footer 不重複觸發。
 - [x] Skill 補上開啟 sheet／route 時立即返回 callback，避免等待選擇期間持續 loading；實際儲存才等待。
 - [ ] 消費端逐頁比對原版文案／排版與新版實機驗收。
+
+
+## 分組列的獨立操作（2026-10-30）
+
+- [x] 原有 FossListTile 支援 trailing 指標／鍵盤操作，但 MergeSemantics 把兩個動作強制合併。
+- [x] 本次保留既有 API，為 row 與 trailing 建立分開的 semantics boundary。
+- [x] 56 項 AppUI 與 40 項上游 list-tile 回歸測試通過；原有明暗 CI Golden 保持不變，嚴格 analyze 無問題。
+- [x] 以 SemanticsAction 分別觸發 row／trailing，確認 trailing 不誤觸 row；Skill 驗證通過。
+- [ ] 消費端更新、實際預覽與實機 VoiceOver 驗收。

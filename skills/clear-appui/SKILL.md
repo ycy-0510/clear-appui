@@ -82,7 +82,9 @@ contract is an error: use the package's bundled skill rather than guessing.
   selected backgrounds; preserve cancellation and Reduce Motion.
 - Use AppListGroup for small groups and AppSliverListGroup for long ones, with
   AppListTile rows. Only the outer group edges are rounded; inner rows share
-  the surface with dividers and no per-row corner cutouts. A white canvas must
+  the surface with dividers and no per-row corner cutouts. Interactive trailing
+  controls keep an independent accessibility action; do not merge a remove/switch
+  control into the row's open action. A white canvas must
   retain the library's subtle gray group/card fill: AppCard and list groups
   derive it from FossUI secondary-over-card tokens. Removing brand tint must
   not remove this grouping contrast. For segmented search

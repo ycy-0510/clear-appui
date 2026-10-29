@@ -194,7 +194,9 @@ class _FossListTileState extends State<FossListTile> {
     // press repaints the fill without rebuilding the slots.
     final content = _content(visuals);
 
-    return MergeSemantics(
+    // Keep trailing controls outside the row action for assistive technology.
+    return Semantics(
+      container: true,
       child: Semantics(
         button: widget.onTap != null,
         enabled: widget.onTap == null ? null : widget.enabled,
@@ -305,7 +307,10 @@ class _FossListTileState extends State<FossListTile> {
         // of pushing the trailing slot off the row.
         Expanded(child: text),
         if (widget.trailing case final trailing?)
-          IconTheme.merge(data: icon, child: trailing),
+          Semantics(
+            container: true,
+            child: IconTheme.merge(data: icon, child: trailing),
+          ),
       ],
     );
   }

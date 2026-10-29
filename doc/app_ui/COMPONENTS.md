@@ -48,6 +48,8 @@ screen state with AppNavigationBody. Its page crossfades do not delay selection.
 The bar uses one persistent moving indicator, with reduced-motion support.
 
 AppListGroup supplies one continuous surface for small groups of AppListTile rows.
+Interactive trailing controls retain their own accessibility action as well as
+their pointer/keyboard target; a remove control does not activate the row.
 Use AppSliverListGroup in CustomScrollView for lazy results below scrolling headers;
 apply advertised bottom padding as trailing scroll content. Only group exterior
 edges are rounded, with flat interior rows and dividers.

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show SemanticsAction, SemanticsActionEvent;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,6 +20,58 @@ Widget host(Widget child, {bool reduced = false}) => WidgetsApp(
 );
 
 void main() {
+  testWidgets('grouped row exposes an independent trailing action', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    try {
+      var opens = 0;
+      var removals = 0;
+      await tester.pumpWidget(
+        host(
+          AppListGroup(
+            children: [
+              AppListTile(
+                title: const Text('Biology'),
+                onTap: () => opens++,
+                trailing: AppButton(
+                  onPressed: () => removals++,
+                  semanticLabel: 'Remove Biology',
+                  child: const Text('Remove'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      final row = tester.getSemantics(find.byType(AppListTile));
+      final remove = tester.getSemantics(find.byType(AppButton));
+      expect(remove.id, isNot(row.id));
+      expect(remove.label, contains('Remove Biology'));
+      tester.binding.performSemanticsAction(
+        SemanticsActionEvent(
+          nodeId: remove.id,
+          viewId: tester.view.viewId,
+          type: SemanticsAction.tap,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(removals, 1);
+      expect(opens, 0);
+      tester.binding.performSemanticsAction(
+        SemanticsActionEvent(
+          nodeId: row.id,
+          viewId: tester.view.viewId,
+          type: SemanticsAction.tap,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(opens, 1);
+    } finally {
+      semantics.dispose();
+    }
+  });
+
   testWidgets('an action card wraps text and keeps its child action separate', (
     tester,
   ) async {

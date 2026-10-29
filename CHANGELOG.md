@@ -1,5 +1,8 @@
 ## Unreleased
 
+- Keep list-row activation and interactive trailing controls as separate
+  accessibility actions, preserving pointer and keyboard behavior.
+
 - Make product button and navigation-content compression perceptible, with a
   shared return spring and independent sliding navigation selection surface.
 
