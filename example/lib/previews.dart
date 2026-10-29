@@ -4,6 +4,52 @@ import 'package:fossui/app_ui.dart';
 import 'package:fossui/app_ui_showcase.dart';
 import 'package:fossui_example/upstream_gallery.dart';
 
+/// Opaque floating groups, compact typography and aligned content insets.
+@Preview(
+  name: 'Floating top controls',
+  group: 'AppUI / Navigation',
+  size: Size(390, 844),
+  wrapper: appPreviewWrapper,
+)
+Widget floatingTopControls() => AppTheme(
+  data: AppThemeData.light,
+  child: StatefulBuilder(
+    builder: (context, update) => AppScaffold(
+      topBar: AppTopBar(
+        leading: AppTopBarAction(
+          icon: const Text('‹'),
+          label: 'Back',
+          onPressed: () {},
+        ),
+        actions: [
+          AppTopBarAction(
+            icon: const Text('✎'),
+            label: 'Edit',
+            onPressed: () => update(() {}),
+          ),
+          AppTopBarAction(
+            icon: const Text('⋯'),
+            label: 'More',
+            onPressed: () => update(() {}),
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: context.appTheme.tokens.spacing.all(4),
+        children: const [
+          AppText('Library', role: AppTextRole.display),
+          SizedBox(height: 16),
+          AppCard(
+            child: AppText(
+              'Page titles stay in the content. Actions share a surface.',
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
+);
+
 /// Gives each preview an independent Navigator and its actual constrained size.
 Widget appPreviewWrapper(Widget child) => WidgetsApp(
   debugShowCheckedModeBanner: false,

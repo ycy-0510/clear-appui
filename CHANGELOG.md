@@ -1,5 +1,10 @@
 ## Unreleased
 
+- Add AppTopBar with a floating leading control and one shared trailing action
+  capsule, using opaque surfaces. Define the matching design rules in the skill.
+- Refine AppTheme product typography and 16-point card padding while preserving
+  system text scaling and existing upstream FossTheme defaults.
+
 - Isolate AppText semantic nodes so headings and adjacent actions remain
   independently navigable in composed interfaces.
 - Bound the entire toast pile to the front card's width; pause rear timers

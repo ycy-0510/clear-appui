@@ -226,7 +226,7 @@ class AppCard extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: t.spacing.all(5),
+        padding: t.spacing.all(4),
         child: DefaultTextStyle.merge(
           style: TextStyle(color: t.colors.cardForeground),
           child: Column(

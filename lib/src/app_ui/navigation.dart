@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fossui/src/app_ui/components.dart';
 import 'package:fossui/src/app_ui/foundation.dart';
 import 'package:fossui/src/app_ui/platform.dart';
 
@@ -14,6 +15,119 @@ enum AppNavigationMode {
 
   /// Covers content without advertising extra padding.
   overlay,
+}
+
+/// A labelled action in a floating top control group.
+@immutable
+class AppTopBarAction {
+  /// Creates an icon action. A null callback disables it.
+  const AppTopBarAction({
+    required this.icon,
+    required this.label,
+    this.onPressed,
+  });
+
+  /// Decorative icon; [label] names its action for assistive technology.
+  final Widget icon;
+
+  /// Accessible action name.
+  final String label;
+
+  /// Guarded action callback.
+  final FutureOr<void> Function()? onPressed;
+}
+
+/// Separate floating leading and trailing controls with an unpainted gap.
+///
+/// The trailing actions share one opaque capsule. Place the page title in its
+/// content; this widget provides neither glass material nor backdrop blur.
+class AppTopBar extends StatelessWidget {
+  /// Creates route-level floating controls.
+  const AppTopBar({this.leading, this.actions = const [], super.key});
+
+  /// Optional leading action, usually Back or Close.
+  final AppTopBarAction? leading;
+
+  /// Trailing actions sharing a single floating surface.
+  final List<AppTopBarAction> actions;
+
+  Widget _button(AppTopBarAction action) => AppButton(
+    key: ValueKey('app-top-action-${action.label}'),
+    variant: AppButtonVariant.ghost,
+    semanticLabel: action.label,
+    onPressed: action.onPressed,
+    child: action.icon,
+  );
+
+  Widget _group(BuildContext context, Key key, List<AppTopBarAction> items) {
+    final t = context.appTheme.tokens;
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      child: DecoratedBox(
+        key: key,
+        decoration: ShapeDecoration(
+          color: t.colors.card,
+          shape: RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.circular(999),
+            side: BorderSide(color: t.colors.border),
+          ),
+          shadows: [
+            BoxShadow(
+              color: t.colors.foreground.withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: ClipRSuperellipse(
+          borderRadius: BorderRadius.circular(999),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: IconTheme.merge(
+              data: const IconThemeData(size: 20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: items.map(_button).toList(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.symmetric(
+      horizontal: context.appTheme.tokens.spacing(4),
+      vertical: context.appTheme.tokens.spacing(2),
+    ),
+    child: Row(
+      children: [
+        if (leading case final action?)
+          _group(context, const ValueKey('app-top-leading'), [action]),
+        if (actions.isNotEmpty)
+          Expanded(
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: context.appTheme.tokens.spacing(3),
+              ),
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: _group(
+                  context,
+                  const ValueKey('app-top-trailing'),
+                  actions,
+                ),
+              ),
+            ),
+          )
+        else
+          const Spacer(),
+      ],
+    ),
+  );
 }
 
 /// Shared page chrome, safe areas, keyboard handling and floating navigation.

@@ -34,6 +34,25 @@ void main() {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        AppTopBar(
+                          leading: AppTopBarAction(
+                            icon: const Text('‹'),
+                            label: 'Back',
+                            onPressed: () {},
+                          ),
+                          actions: [
+                            AppTopBarAction(
+                              icon: const Text('✎'),
+                              label: 'Edit',
+                              onPressed: () {},
+                            ),
+                            AppTopBarAction(
+                              icon: const Text('⋯'),
+                              label: 'More',
+                              onPressed: () {},
+                            ),
+                          ],
+                        ),
                         const AppText(
                           'Course Library',
                           role: AppTextRole.heading,

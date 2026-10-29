@@ -10,7 +10,7 @@ the existing `Foss*` APIs through `package:fossui/fossui.dart`.
 | Theme | AppTheme, AppThemeData, AppDimensions, AppMotion, AppSheetStyle | [foundation.dart](../../lib/src/app_ui/foundation.dart) |
 | Controls | AppButton, AppText, AppIcon, AppCard, AppBadge, AppTextField, AppCheckbox, AppSwitch, AppListTile, AppEmptyState | [components.dart](../../lib/src/app_ui/components.dart) |
 | Layout | AppLayoutEnvironment, AppAdaptiveLayout, AppConstrainedContent, AppAdaptiveGrid | [layout.dart](../../lib/src/app_ui/layout.dart) |
-| Navigation | AppScaffold, AppNavigationBar, AppNavigationItem | [navigation.dart](../../lib/src/app_ui/navigation.dart) |
+| Navigation | AppScaffold, AppTopBar, AppTopBarAction, AppNavigationBar, AppNavigationItem | [navigation.dart](../../lib/src/app_ui/navigation.dart) |
 | Presentation | AppPresentationHost, AppSheet, AppSheetController, AppSheetDetent, AppPopover, showAppSheet | [presentation.dart](../../lib/src/app_ui/presentation.dart) |
 | Drag and drop | AppDragCoordinator, AppDragScope, AppDraggable, AppDropTarget | [interaction.dart](../../lib/src/app_ui/interaction.dart) |
 | Picker | AppDatePicker | [pickers.dart](../../lib/src/app_ui/pickers.dart) |
@@ -63,3 +63,5 @@ dismisses it and reveals the next notification.
 Use inline feedback for an actionable form error. Loading notifications persist
 until updated or dismissed. See the [toast source](../../lib/src/components/toast/)
 for available variants, duration and per-instance styling.
+
+Top action grouping, typography and spacing follow [DESIGN_STYLE.md](DESIGN_STYLE.md).

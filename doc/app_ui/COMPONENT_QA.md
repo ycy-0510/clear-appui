@@ -110,3 +110,11 @@ runtime errors 為零；macOS 桌面人工操作因電腦鎖定待解鎖。
 相鄰操作共用語意邊界。新增標題／按鈕節點、header flag 與 tap action 回歸；
 `test/app_ui` 非 Golden 21 項通過。原生 Widget tree 原本即可分別找到節點，
 本次明確隔離容器，瀏覽器與實機讀屏驗收仍須分別記錄；不重報完整套件回歸。
+
+
+2026-10-29 共用樣式：新增 AppTopBar（返回獨立 surface、右側動作共用 capsule、
+不使用 blur），產品 typography 調為 12/13/15/17/20/22，AppCard 內距 16。
+AppUI 26 項（24 互動／行為＋2 CI Golden）通過；新控制群組驗證窄版、RTL、
+pointer cancel 與鍵盤啟動，兩張產品視覺基準經檢視後更新並重跑。
+Skill 已同步 DESIGN_STYLE 指南及 doctor 來源。此輪未重跑完整上游元件庫，
+不把產品配置驗證延伸成所有元件狀態的視覺驗收。

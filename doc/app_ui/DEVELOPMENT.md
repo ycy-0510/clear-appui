@@ -42,7 +42,7 @@ startup workaround requires Node.js 22 or later; the UI library has no Node
 runtime dependency. Re-evaluate it when upgrading Flutter. The legacy detection
 flag is not used because that path does not initialize the scaffold's DTD.
 
-The nine previews cover phone light/dark, tablet, large text, AppUI states and
+The ten previews cover phone light/dark, tablet, large text, AppUI states and
 three complete-catalog configurations. Every catalog preview can select any of
 the 39 component families. Each preview owns its Navigator and sample state.
 
@@ -182,3 +182,5 @@ libraries or changing app capabilities.
 review their diff on a branch before merging. Keep new AppUI features in
 `lib/src/app_ui/` and focused upstream fixes in separate commits. Retain
 `LICENSE`, `NOTICE` and `fonts/OFL.txt` when distributing the fork.
+
+The floating-top-controls preview demonstrates the shared style in [DESIGN_STYLE.md](DESIGN_STYLE.md).

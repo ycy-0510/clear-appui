@@ -90,6 +90,21 @@ class AppDimensions {
   final double navigationExtent;
 }
 
+// Product density is adapted through FossTheme's existing token engine.
+FossThemeData _productTokens(FossThemeData base) {
+  final t = base.typography;
+  return base.copyWith(
+    typography: t.copyWith(
+      xs: t.xs.copyWith(fontSize: 12, height: 16 / 12),
+      sm: t.sm.copyWith(fontSize: 13, height: 18 / 13),
+      base: t.base.copyWith(fontSize: 15, height: 22 / 15),
+      lg: t.lg.copyWith(fontSize: 17, height: 24 / 17),
+      xl: t.xl.copyWith(fontSize: 20, height: 26 / 20),
+      xl2: t.xl2.copyWith(fontSize: 22, height: 28 / 22),
+    ),
+  );
+}
+
 /// One source for product tokens and their FossUI adapter.
 @immutable
 class AppThemeData {
@@ -104,35 +119,39 @@ class AppThemeData {
 
   /// Light product palette, derived through the shared FossUI token engine.
   static final light = AppThemeData(
-    tokens: FossThemeData.light.retheme(
-      const FossThemeSpec(
-        background: Color(0xFFF2F2F7),
-        foreground: Color(0xFF1C1C1E),
-        cardForeground: Color(0xFF1C1C1E),
-        primary: Color(0xFF0060D6),
-        primaryForeground: Color(0xFFFFFFFF),
-        accent: Color(0x0F0060D6),
-        accentForeground: Color(0xFF0060D6),
-        ring: Color(0xFF0060D6),
-        radius: 14,
+    tokens: _productTokens(
+      FossThemeData.light.retheme(
+        const FossThemeSpec(
+          background: Color(0xFFF2F2F7),
+          foreground: Color(0xFF1C1C1E),
+          cardForeground: Color(0xFF1C1C1E),
+          primary: Color(0xFF0060D6),
+          primaryForeground: Color(0xFFFFFFFF),
+          accent: Color(0x0F0060D6),
+          accentForeground: Color(0xFF0060D6),
+          ring: Color(0xFF0060D6),
+          radius: 14,
+        ),
       ),
     ),
   );
 
   /// Dark product palette, with separate content and floating surfaces.
   static final dark = AppThemeData(
-    tokens: FossThemeData.dark.retheme(
-      const FossThemeSpec(
-        background: Color(0xFF101012),
-        card: Color(0xFF1C1C1E),
-        popover: Color(0xFF2C2C2E),
-        primary: Color(0xFF80B8FF),
-        primaryForeground: Color(0xFF071B36),
-        accent: Color(0x1F80B8FF),
-        accentForeground: Color(0xFF80B8FF),
-        ring: Color(0xFF80B8FF),
-        mutedForeground: Color(0xFF98989F),
-        radius: 14,
+    tokens: _productTokens(
+      FossThemeData.dark.retheme(
+        const FossThemeSpec(
+          background: Color(0xFF101012),
+          card: Color(0xFF1C1C1E),
+          popover: Color(0xFF2C2C2E),
+          primary: Color(0xFF80B8FF),
+          primaryForeground: Color(0xFF071B36),
+          accent: Color(0x1F80B8FF),
+          accentForeground: Color(0xFF80B8FF),
+          ring: Color(0xFF80B8FF),
+          mutedForeground: Color(0xFF98989F),
+          radius: 14,
+        ),
       ),
     ),
   );

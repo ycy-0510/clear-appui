@@ -15,7 +15,7 @@ instructions when migrating an existing application.
 
 Run `node <this-skill>/scripts/doctor.mjs <flutter-project>` after dependency
 resolution. It locates the actual package through `.dart_tool/package_config.json`,
-checks the API contract, and prints the matching source paths and Git revision.
+checks the API contract, and prints the matching source paths, design guide and Git revision.
 If dependencies are missing, install the Git dependency shown in
 [the integration reference](references/integration.md), then run the doctor again.
 
@@ -36,6 +36,13 @@ contract is an error: use the package's bundled skill rather than guessing.
 - Use AppButton, AppText, AppCard, AppTextField, AppBadge, AppCheckbox,
   AppSwitch and AppListTile where they fit. Use existing Foss* variants for
   lower-level selection, dialogs, menus, progress, or feedback.
+- Read the package's `doc/app_ui/DESIGN_STYLE.md` before styling. Shared design
+  changes belong in the package and this skill, followed by upgrading consumers;
+  do not fork typography, spacing or navigation materials inside each app.
+- Use AppTopBar for top navigation: Back/Close has one floating leading surface;
+  all trailing actions share one floating capsule. Keep titles in page content,
+  leave the space between groups unpainted, and use the opaque library surface.
+  Do not create a separate floating tile for every trailing icon or add glass/blur.
 - Use AppScaffold and AppNavigationBar for product page chrome. Preserve bottom
   content reachability using the scaffold's advertised MediaQuery padding.
 - Put AppPresentationHost inside the relevant route. Present sheets through
@@ -55,6 +62,10 @@ and the official sources linked there. Use HIG for hierarchy, readable content,
 safe areas, keyboard access, touch targets, motion and accessibility. Product
 token values are configurable choices, not Apple-prescribed metrics.
 
+Use the package's compact product type scale (15 body, 17 title, 20 heading,
+22 display) and 16-point content/card insets. These are product defaults, not HIG
+mandates. Preserve system text scaling; keep intentionally enlarged preview
+cases separate and label them. Avoid double padding from nested cards and rows.
 Maintain consistent spacing and concentric shapes. Avoid rebuilding the library's
 navigation, sheet material or gesture handling in individual screens. The Flutter
 sheet is an approximation of Apple's materials; verify platform-specific behavior

@@ -55,6 +55,7 @@ async function main() {
     skillMatchesPackage: digest(currentSkill) === digest(installedSkill),
     implementationDirectory: join(packageRoot, 'lib/src/app_ui'),
     higNotes: join(packageRoot, 'doc/app_ui/APPLE_HIG_NOTES.md'),
+    designGuide: join(packageRoot, 'doc/app_ui/DESIGN_STYLE.md'),
   }, null, 2) + '\n');
 }
 

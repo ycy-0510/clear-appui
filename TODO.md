@@ -203,3 +203,12 @@
 - [x] 新增 docs 首頁、Getting Started、Components 與 Agent Skill 使用指南。
 - [x] 維護規則寫入 docs：API／行為改動同步更新範例、Skill contract、changelog 與 QA。
 - [x] 11 份文件的本地連結檢查通過；Skill 官方驗證腳本通過。
+
+
+## 共用設計樣式更新（2026-10-29）
+
+- [x] 在 package 新增 AppTopBar：返回獨立浮動、右側操作共用一個不透明 capsule。
+- [x] 產品 type scale、16pt card padding 與設計規則集中於 AppTheme／DESIGN_STYLE。
+- [x] 更新 portable Skill 與 doctor 的設計文件來源。
+- [x] AppUI 26 項通過，涵蓋分組、RTL、觸控／鍵盤／取消與窄版；兩張產品 Golden 已更新並重跑通過。
+- [ ] 發布 Git 修訂、重新安裝消費端 Skill，驗證 package 與 Skill 匹配。

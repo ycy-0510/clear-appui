@@ -26,3 +26,5 @@ are separate forms of evidence. Keep unfinished checks explicitly pending.
 
 The repository README introduces the library to users. Detailed setup,
 implementation decisions, and maintenance records belong in these guides.
+
+- [Product design style](app_ui/DESIGN_STYLE.md): floating controls, type scale and spacing.

@@ -90,3 +90,5 @@ See [agent integration](doc/app_ui/AGENT_SKILL.md) for version checks and setup.
 
 MIT. This fork preserves FossUI attribution and the bundled Geist font license.
 See [LICENSE](LICENSE), [NOTICE](NOTICE), and [fonts/OFL.txt](fonts/OFL.txt).
+
+Shared floating top controls, typography and spacing are defined in the [product design style](doc/app_ui/DESIGN_STYLE.md).

@@ -25,6 +25,7 @@ Read these installed sources when composing the corresponding feature:
 | Theme and tokens | `lib/src/app_ui/foundation.dart` |
 | Product controls | `lib/src/app_ui/components.dart` |
 | Responsive panes | `lib/src/app_ui/layout.dart` |
+| Shared design rules | `doc/app_ui/DESIGN_STYLE.md` |
 | Scaffold and navigation | `lib/src/app_ui/navigation.dart` |
 | Sheets and popovers | `lib/src/app_ui/presentation.dart` |
 | Drag coordination | `lib/src/app_ui/interaction.dart` |
