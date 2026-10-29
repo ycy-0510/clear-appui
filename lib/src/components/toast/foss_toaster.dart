@@ -179,19 +179,25 @@ class _ToastViewportState extends State<_ToastViewport> {
         return SafeArea(
           child: Padding(
             padding: EdgeInsets.all(sp(4)),
-            child: Stack(
+            child: Align(
               alignment: Alignment.bottomCenter,
-              clipBehavior: Clip.none,
-              children: [
-                // The cards behind fill the front's box so they share its size;
-                // the newest is the non-positioned front that sizes the stack
-                // and paints on top.
-                for (var p = 0; p < visible.length - 1; p++)
-                  Positioned.fill(
-                    child: cardFor(visible[p], visible.length - 1 - p),
-                  ),
-                cardFor(front, 0),
-              ],
+              heightFactor: 1,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: _maxWidth),
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Bound the whole pile so rear fills match the front,
+                    // including when the viewport is wider than a toast.
+                    for (var p = 0; p < visible.length - 1; p++)
+                      Positioned.fill(
+                        child: cardFor(visible[p], visible.length - 1 - p),
+                      ),
+                    cardFor(front, 0),
+                  ],
+                ),
+              ),
             ),
           ),
         );

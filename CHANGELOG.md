@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Bound the entire toast pile to the front card's width; pause rear timers
+  until their messages reach the front so queued notifications remain readable.
 - Rename the fork to Clear AppUI (`ycy-0510/clear-appui`), document GitHub
   installation and preview workflows, and retain the `fossui` Dart package ID.
 - Audit all 39 component families in a searchable gallery with light/dark,

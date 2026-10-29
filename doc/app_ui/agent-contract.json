@@ -1,0 +1,8 @@
+{
+  "contractVersion": 1,
+  "package": "fossui",
+  "repository": "https://github.com/ycy-0510/clear-appui",
+  "productEntrypoint": "lib/app_ui.dart",
+  "legacyEntrypoint": "lib/fossui.dart",
+  "bundledSkill": "skills/clear-appui/SKILL.md"
+}

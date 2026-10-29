@@ -71,7 +71,7 @@ Apple 官方依據與圓角／材質限制見 [HIG notes](APPLE_HIG_NOTES.md)。
 | 36 | [AlertDialog](../../lib/src/components/dialog/foss_alert_dialog.dart) | ✓ | ✓ | 取消／確認、長描述；實際 Cancel 關閉。 |
 | 37 | [Drawer](../../lib/src/components/drawer/foss_drawer.dart) | ✓ | ✓ | bottom／right 展示；本輪壓力測試展開 bottom，其他方向由原測試回歸。 |
 | 38 | [Tooltip](../../lib/src/components/tooltip/foss_tooltip.dart) | ✓ | ✓ | 有標籤的 icon trigger、長按顯示說明；hover／Escape 由原測試回歸。 |
-| 39 | [Toast](../../lib/src/components/toast/foss_toast.dart) | ✓ | ✓ | 全 variants 入口，展開 success；queue／暫停／關閉由原測試回歸。 |
+| 39 | [Toast](../../lib/src/components/toast/foss_toast.dart) | ✓ | ✓ | 全 variants 入口；另補兩／三則的窄／寬尺寸回歸，修正後卡過寬及排到前方前即逾時。後卡留白是既有堆疊設計。 |
 
 ## 證據與重跑
 

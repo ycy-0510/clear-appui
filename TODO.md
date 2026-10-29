@@ -184,6 +184,21 @@
 - [x] 獨立專案依 README 從 GitHub 安裝，實際解析 `4b1abd1`；直接擷取公開 API 範例執行 analyze，無問題。
 - [x] 改名後的範例入口測試通過；macOS hot reload 成功，runtime errors 為零；兩份 Info.plist 與 README 本地連結檢查通過。
 - [ ] GitHub Actions workflow 更新：本機 `codex/fork-setup` 保留修改；目前 GitHub CLI 憑證缺少 `workflow` scope，遠端先保留原流程。
-- [ ] 通用 Agent Skill：先讀真實 API、重用現成元件，再套用 HIG 與共用 theme。
-- [ ] Skill 與套件版本配對、依賴檢查及 bootstrap／doctor。
-- [ ] NPX 互動安裝與多 agent 選擇；尚未提供可執行的安裝指令。
+- [x] 通用 Agent Skill：先讀真實 API、重用現成元件，再套用 HIG 與共用 theme。
+- [x] Skill 的 API contract、套件內 matching skill 與 doctor 來源解析；本機實測與官方格式驗證通過。
+- [ ] 透過 NPX 實際安裝到 BIOCAB，驗證 Git 套件與 Skill 的相容性。
+
+## Toast 連續通知修正（2026-10-29）
+
+- [x] 重現桌面後卡寬度 992px、前卡 360px 的錯誤，新增 320／1024px、兩／三則通知測試。
+- [x] 最大寬度套用至整個通知堆疊，後卡隨前卡尺寸縮放。
+- [x] 後卡維持上游留白堆疊；僅前卡顯示訊息與接收操作。
+- [x] 修正後排計時：訊息尚未到前排時暫停，避免未讀即消失。
+- [x] Toast 31 項專項（含兩張 CI 明暗 Golden）通過；靜態分析無問題，hot reload 成功，runtime errors 為零。
+
+## 公開文件整理（2026-10-29）
+
+- [x] README 改為精簡英文版，面向套件使用者，保留安裝、快速使用、Preview 與文件入口。
+- [x] 新增 docs 首頁、Getting Started、Components 與 Agent Skill 使用指南。
+- [x] 維護規則寫入 docs：API／行為改動同步更新範例、Skill contract、changelog 與 QA。
+- [x] 11 份文件的本地連結檢查通過；Skill 官方驗證腳本通過。

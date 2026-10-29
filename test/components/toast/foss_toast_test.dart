@@ -98,6 +98,48 @@ void main() {
     );
   });
 
+  for (final width in [320.0, 1024.0]) {
+    for (final count in [2, 3]) {
+      testWidgets(
+        'rear cards match front bounds at $width with $count toasts',
+        (
+          tester,
+        ) async {
+          tester.view.devicePixelRatio = 1;
+          tester.view.physicalSize = Size(width, 800);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          addTearDown(tester.view.resetPhysicalSize);
+          await tester.pumpWidget(host());
+          for (var index = 0; index < count; index++) {
+            showFossToast(
+              ctx,
+              FossToast(
+                title: Text('Message $index'),
+                duration: const Duration(hours: 1),
+              ),
+            );
+          }
+          await tester.pumpAndSettle();
+          final surfaces = find.byWidgetPredicate(
+            (widget) =>
+                widget is DecoratedBox &&
+                widget.decoration is ShapeDecoration &&
+                (widget.decoration as ShapeDecoration).shape
+                    is RoundedSuperellipseBorder,
+          );
+          expect(surfaces, findsNWidgets(count));
+          final frontSize = tester.getSize(surfaces.last);
+          expect(frontSize.width, lessThanOrEqualTo(360));
+          for (var index = 0; index < count - 1; index++) {
+            expect(tester.getSize(surfaces.at(index)), frontSize);
+          }
+          expect(find.text('Message ${count - 1}'), findsOneWidget);
+          await tester.pumpWidget(const SizedBox());
+        },
+      );
+    }
+  }
+
   testWidgets('renders the leading glyph and description for each status', (
     tester,
   ) async {
@@ -244,6 +286,33 @@ void main() {
       FossToastScope.of(ctx).entries.any((e) => e.id == hidden),
       isTrue,
     );
+  });
+
+  testWidgets('rear toast keeps its reading time until promoted', (
+    tester,
+  ) async {
+    await tester.pumpWidget(host());
+    final controller = FossToastScope.of(ctx);
+    final older = controller.show(
+      const FossToast(
+        title: Text('Older message'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+    final newer = controller.show(
+      const FossToast(
+        title: Text('Newer message'),
+        duration: Duration(hours: 1),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+    expect(controller.entries.any((entry) => entry.id == older), isTrue);
+    controller.dismiss(newer);
+    await tester.pumpAndSettle();
+    expect(find.text('Older message'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 3));
+    expect(controller.entries, isEmpty);
   });
 
   testWidgets('pressing a toast holds it open past its duration', (

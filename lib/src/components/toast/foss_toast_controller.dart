@@ -28,14 +28,13 @@ class FossToastEntry {
 /// Owns the queue of live toasts and their auto-dismiss timers. Shared by a
 /// `FossToaster` and read with `FossToastScope.of`. Notifies on every change.
 ///
-/// A toast's dismiss timer runs only while the toast is one of the
-/// [maxVisible] on screen and is not being pressed, so a queued toast cannot
-/// expire before it is ever seen, and a press holds it open.
+/// A toast's dismiss timer runs only while its message is at the front and
+/// not being pressed. Rear surfaces pause until their message can be read.
 class FossToastController extends ChangeNotifier {
   /// The default auto-dismiss delay.
   static const Duration defaultDuration = Duration(milliseconds: 5000);
 
-  /// The most toasts shown at once; older ones wait.
+  /// The most surfaces shown at once; only the front displays its message.
   static const int maxVisible = 3;
 
   final List<FossToastEntry> _entries = <FossToastEntry>[];
@@ -100,14 +99,12 @@ class FossToastController extends ChangeNotifier {
     _reconcile();
   }
 
-  // Runs a timer for every visible, unpressed, auto-dismiss entry, and pauses
-  // the rest. Called after every change; idempotent.
+  // Only the front has readable content; every rear entry must retain its time.
   void _reconcile() {
-    final firstVisible = _entries.length - maxVisible;
     for (var i = 0; i < _entries.length; i++) {
       final entry = _entries[i];
-      final visible = i >= firstVisible;
-      final shouldRun = entry._total != null && visible && !entry._pressed;
+      final front = i == _entries.length - 1;
+      final shouldRun = entry._total != null && front && !entry._pressed;
       if (shouldRun && entry._timer == null) {
         _resume(entry);
       } else if (!shouldRun && entry._timer != null) {
