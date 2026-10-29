@@ -468,11 +468,22 @@ class AppCheckbox extends StatelessWidget {
   /// Optional visible label.
   final String? label;
   @override
-  Widget build(BuildContext context) => FossCheckbox(
-    value: value,
-    onChanged: onChanged,
-    label: label,
-  );
+  Widget build(BuildContext context) {
+    final control = FossCheckbox(
+      value: value,
+      onChanged: onChanged,
+      label: label,
+    );
+    if (!_AppListGroupScope.maybeOf(context)) return control;
+    final spacing = context.appTheme.tokens.spacing;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing(4),
+        vertical: spacing(1),
+      ),
+      child: control,
+    );
+  }
 }
 
 /// Controlled switch with an explicit accessible label.

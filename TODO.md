@@ -273,3 +273,9 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] 54 項 AppUI 測試、明暗 Golden 與嚴格分析通過；兩張基準圖已檢視。
 - [x] BIOCAB 採用 7f0b080，45 項測試與分析通過；NPX 更新 repo-level Skill，doctor 確認一致。
 - [x] 互動 Preview 確認白底上的灰色 card／list group、捲動中間列及專用 dark preview；hot restart 1,033ms 後 SDK disposed view assertion，refresh 後新 session 操作無 error，未宣稱 SDK 問題已修復。
+
+## 分組 Checkbox 內距（2026-10-30）
+
+- [x] FossCheckbox 已提供 48-point 點擊區；本次 AppCheckbox 在 eager／sliver list group 內補上共用 16／4-point 內距，保留 standalone 用法。
+- [x] 更新 portable Skill 與設計文件，避免在產品頁面另補第二層 padding。
+- [ ] 既有元件檢查、消費端升級與 PDF review 預覽驗證。

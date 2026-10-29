@@ -1,5 +1,8 @@
 ## Unreleased
 
+- Inset AppCheckbox rows inside eager/lazy list groups so the control clears the
+  rounded group edge, without changing standalone filter checkbox spacing.
+
 - Restore subtle neutral fills for AppCard and eager/lazy list groups on white
   canvases, using existing FossUI tokens without recoloring page chrome.
 

@@ -76,6 +76,9 @@ contract is an error: use the package's bundled skill rather than guessing.
   derive it from FossUI secondary-over-card tokens. Removing brand tint must
   not remove this grouping contrast. For segmented search
   modes, reuse FossTabs and its existing sliding indicator.
+  AppCheckbox inside either list group receives the shared row insets. Do not
+  place raw, edge-flush checkbox controls against the rounded group boundary or
+  add a second page-specific inset around AppCheckbox.
 - Put AppPresentationHost inside the relevant route. Present sheets through
   showAppSheet; connect the supplied ScrollController to the sheet body. Share
   that host's drag coordinator across page and sheet. The host owns animated

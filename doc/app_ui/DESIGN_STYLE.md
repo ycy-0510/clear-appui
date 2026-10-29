@@ -111,6 +111,9 @@ resolve their opaque fill by compositing FossUI's secondary fill over its card
 color. This gives the default light theme a subtle neutral gray group and keeps
 dark groups distinct, without tinting the page or changing floating controls.
 Do not flatten grouped content into the canvas when removing a brand tint.
+AppCheckbox inside either list group inherits 16-point horizontal and 4-point
+vertical insets in addition to its existing 48-point target. Standalone filter
+checkboxes keep their surrounding layout's spacing; avoid double-insetting them.
 
 ## Typography and spacing
 

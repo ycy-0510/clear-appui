@@ -81,6 +81,20 @@ void main() {
                           errorText: 'Required',
                         ),
                         const AppCard(child: AppText('Composable content')),
+                        AppListGroup(
+                          children: [
+                            AppCheckbox(
+                              value: true,
+                              label: 'Selected vocabulary',
+                              onChanged: (_) {},
+                            ),
+                            AppCheckbox(
+                              value: false,
+                              label: 'Another vocabulary entry',
+                              onChanged: (_) {},
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
