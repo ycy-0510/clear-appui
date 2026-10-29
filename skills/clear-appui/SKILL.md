@@ -49,6 +49,10 @@ contract is an error: use the package's bundled skill rather than guessing.
 - Use AppButton, AppText, AppCard, AppTextField, AppBadge, AppCheckbox,
   AppSwitch and AppListTile where they fit. Use existing Foss* variants for
   lower-level selection, dialogs, menus, progress, or feedback.
+  A callback that opens a sheet/route should return immediately; handle its
+  eventual result in an unawaited continuation. Await actual saving/network work
+  so button loading describes work rather than a user's open dialog. Capture
+  the Navigator before a mutation that can remove the initiating widget.
   Use AppCard.onTap for an actionable summary card; it shares button feedback
   without adding a second content inset. Nested footer buttons keep their own
   action. Preserve original page wording and section/action order when migrating.

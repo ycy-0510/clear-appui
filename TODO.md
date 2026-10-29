@@ -278,9 +278,13 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 
 - [x] FossCheckbox 已提供 48-point 點擊區；本次 AppCheckbox 在 eager／sliver list group 內補上共用 16／4-point 內距，保留 standalone 用法。
 - [x] 更新 portable Skill 與設計文件，避免在產品頁面另補第二層 padding。
-- [ ] 既有元件檢查、消費端升級與 PDF review 預覽驗證。
+- [x] 54 項 AppUI 測試、明暗 Golden 與嚴格 analyze 通過；BIOCAB PDF review 測試確認 16-point 左側內距及 48-point 點擊區。
+- [ ] 最新消費端 PDF review 實際預覽／實機驗證。
 
 ## 按壓回饋可見度（2026-10-30）
 
 - [x] 將一般按鈕縮放調為 0.95、導航內容 0.88，加入 160ms 回彈；保留滑動底色及穩定點擊區。
-- [ ] 驗證快速點按、中途反向、取消、鍵盤與 Reduce Motion；消費端逐頁比對原版文案／排版。
+- [x] 55 項 AppUI 測試與嚴格 analyze 通過，包含快速點按、反向、取消、鍵盤、Reduce Motion 與巢狀 action card；保留兩張 Golden。
+- [x] 新增 AppCard onTap／semanticLabel，重用 AppButton 按壓及穩定點擊區；巢狀 footer 不重複觸發。
+- [x] Skill 補上開啟 sheet／route 時立即返回 callback，避免等待選擇期間持續 loading；實際儲存才等待。
+- [ ] 消費端逐頁比對原版文案／排版與新版實機驗收。
