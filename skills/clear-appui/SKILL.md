@@ -33,6 +33,12 @@ contract is an error: use the package's bundled skill rather than guessing.
 - Put `AppTheme` below the application's shell. Read semantic values from
   `context.appTheme.tokens`; use `dimensions`, `motion`, and `sheet` for product
   overrides. AppTheme adapts FossTheme; keep this single token source.
+- When migrating a branded app, inspect its maintained palette, logos, functional
+  icons, launcher icons and launch screen first. Map those colors once with
+  `AppThemeData.light/dark.copyWith(tokens: base.tokens.retheme(FossThemeSpec(...)))`;
+  retain the package's typography, spacing and controls. The blue presets are
+  fallbacks, not a replacement for the host brand. Reuse original artwork and
+  synchronize Cupertino/Material shell colors with the same semantic tokens.
 - Use AppButton, AppText, AppCard, AppTextField, AppBadge, AppCheckbox,
   AppSwitch and AppListTile where they fit. Use existing Foss* variants for
   lower-level selection, dialogs, menus, progress, or feedback.

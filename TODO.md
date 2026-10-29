@@ -212,3 +212,4 @@
 - [x] 更新 portable Skill 與 doctor 的設計文件來源。
 - [x] AppUI 26 項通過，涵蓋分組、RTL、觸控／鍵盤／取消與窄版；兩張產品 Golden 已更新並重跑通過。
 - [x] 發布 Git 修訂 `324b24b`、透過 NPX 重新安裝 BIOCAB Skill；doctor 確認完全匹配。
+- [x] Skill／設計文件補上品牌遷移規則：原版配色、標誌、launcher／啟動畫面；以既有 retheme API 集中映射，保留共用字級與互動。

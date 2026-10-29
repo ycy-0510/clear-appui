@@ -4,6 +4,35 @@ These defaults belong to Clear AppUI and its matching skill. Update this package
 first, then upgrade consuming apps. Do not duplicate a token palette or build
 app-specific replacements for shared navigation and presentation components.
 
+## Host branding
+
+The preset blue palette is a fallback. During migration, preserve the host's
+maintained brand colors, logos, functional icons, launcher icon and launch screen.
+Keep the brand mapping in one application theme adapter. Start with the product
+preset so shared typography, spacing, shapes and interaction behavior survive:
+
+```dart
+final base = AppThemeData.light;
+final branded = base.copyWith(
+  tokens: base.tokens.retheme(
+    const FossThemeSpec(
+      primary: brandPrimary,
+      primaryForeground: onBrandPrimary,
+      accent: brandSelectionSurface,
+      accentForeground: brandPrimary,
+      ring: brandPrimary,
+    ),
+  ),
+);
+```
+
+Import `FossThemeSpec` from `package:fossui/fossui.dart`. Map background, content,
+surface and border roles as needed, with a corresponding dark palette. Feed the
+same tokens into the Cupertino/Material shell. Product artwork belongs to the
+host app; shared component styling belongs to this package. Check logo contrast
+without recoloring supplied artwork, and verify native launch resources separately
+from Widget Preview.
+
 ## Floating top controls
 
 Use `AppTopBar` inside `AppScaffold.topBar`. A leading Back/Close action has its

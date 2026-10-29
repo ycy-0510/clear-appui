@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Document host-brand preservation and a single semantic theme adapter in the
+  portable skill, including native launcher and launch-screen assets.
 - Add AppTopBar with a floating leading control and one shared trailing action
   capsule, using opaque surfaces. Define the matching design rules in the skill.
 - Refine AppTheme product typography and 16-point card padding while preserving
