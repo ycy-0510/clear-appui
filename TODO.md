@@ -264,3 +264,10 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] 嚴格 analyze 通過；BIOCAB 升級至 eb6429fc，45 項測試通過；repo-level Skill doctor 確認 contract 1 與 package bytes 一致。
 - [x] 互動 Preview 驗證白底與 Sheet 第一次連續把手下拉關閉；hot restart 6,758ms 後 refresh，新 session 操作無 console error。SDK discovery cache 暫時恢復，未宣稱 SDK 問題已修復。
 - [ ] 新版實機手勢／VoiceOver／效能驗收。
+
+## 白底上的分組辨識（2026-10-30）
+
+- [x] 上游 FossUI 已有 secondary 淡色填滿；AppListGroup／AppSliverListGroup 已有連續列與外側圓角。
+- [x] 本次 AppCard 與兩種 list group 共用 secondary-over-card 的不透明底色，恢復淡灰分組層次；頁面保持白底。
+- [x] 更新設計文件及 portable Skill，避免把去除品牌染色誤解成移除分組底色。
+- [ ] Golden／靜態分析、消費端與 Skill 升級、互動明暗預覽驗證。

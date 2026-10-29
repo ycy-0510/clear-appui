@@ -1,5 +1,8 @@
 ## Unreleased
 
+- Restore subtle neutral fills for AppCard and eager/lazy list groups on white
+  canvases, using existing FossUI tokens without recoloring page chrome.
+
 - Animate shared sheet entrance/exit and retain gesture identity across opaque
   and frosted materials, fixing interrupted first pulls from full height.
 - Preserve white/neutral FossUI surfaces; brand emphasis no longer implies a

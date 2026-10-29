@@ -71,7 +71,10 @@ contract is an error: use the package's bundled skill rather than guessing.
   Keep callbacks immediate and support rapid reversal.
 - Use AppListGroup for small groups and AppSliverListGroup for long ones, with
   AppListTile rows. Only the outer group edges are rounded; inner rows share
-  the surface with dividers and no per-row corner cutouts. For segmented search
+  the surface with dividers and no per-row corner cutouts. A white canvas must
+  retain the library's subtle gray group/card fill: AppCard and list groups
+  derive it from FossUI secondary-over-card tokens. Removing brand tint must
+  not remove this grouping contrast. For segmented search
   modes, reuse FossTabs and its existing sliding indicator.
 - Put AppPresentationHost inside the relevant route. Present sheets through
   showAppSheet; connect the supplied ScrollController to the sheet body. Share

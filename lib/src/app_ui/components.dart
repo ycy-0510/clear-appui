@@ -5,6 +5,12 @@ import 'package:fossui/fossui.dart';
 import 'package:fossui/src/app_ui/foundation.dart';
 import 'package:fossui/src/app_ui/platform.dart';
 
+// Keep grouped content distinct from a white canvas, using FossUI's existing
+// subtle-fill role. Resolve it once against the card so adjacent rows stay
+// opaque and continuous, including when placed inside another surface.
+Color _groupedSurface(FossThemeData tokens) =>
+    Color.alphaBlend(tokens.colors.secondary, tokens.colors.card);
+
 /// Product button appearances, independent of the backend enum.
 enum AppButtonVariant {
   /// Filled primary action.
@@ -263,7 +269,7 @@ class AppCard extends StatelessWidget {
     final t = context.appTheme.tokens;
     return DecoratedBox(
       decoration: ShapeDecoration(
-        color: t.colors.card,
+        color: _groupedSurface(t),
         shape: RoundedSuperellipseBorder(
           borderRadius: BorderRadius.circular(t.radii.xl2),
         ),
@@ -602,7 +608,7 @@ class _AppGroupedRow extends StatelessWidget {
         bottom: last ? radius : Radius.zero,
       ),
       child: ColoredBox(
-        color: t.colors.card,
+        color: _groupedSurface(t),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,

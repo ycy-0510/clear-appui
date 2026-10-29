@@ -106,6 +106,12 @@ only the first/last exterior corners and interior dividers. Standalone tiles
 retain FossUI's independent filled-row appearance. Use FossTabs for segmented
 search modes; it already provides a continuous moving indicator.
 
+A white canvas still needs visible grouping. AppCard and both list-group variants
+resolve their opaque fill by compositing FossUI's secondary fill over its card
+color. This gives the default light theme a subtle neutral gray group and keeps
+dark groups distinct, without tinting the page or changing floating controls.
+Do not flatten grouped content into the canvas when removing a brand tint.
+
 ## Typography and spacing
 
 AppTheme adapts FossTheme's existing typography tokens. Its default logical sizes
