@@ -105,3 +105,8 @@ runtime errors 為零；macOS 桌面人工操作因電腦鎖定待解鎖。
 
 後續修改任何元件，都應先切到它的獨立 Gallery 場景，再跑其專項測試與這份矩陣；
 不能只看課程頁就把整個元件庫勾選完成。
+
+2026-10-29：AppText 增加獨立的 semantics container，避免組合頁面的文字與
+相鄰操作共用語意邊界。新增標題／按鈕節點、header flag 與 tap action 回歸；
+`test/app_ui` 非 Golden 21 項通過。原生 Widget tree 原本即可分別找到節點，
+本次明確隔離容器，瀏覽器與實機讀屏驗收仍須分別記錄；不重報完整套件回歸。

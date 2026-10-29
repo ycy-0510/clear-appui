@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Isolate AppText semantic nodes so headings and adjacent actions remain
+  independently navigable in composed interfaces.
 - Bound the entire toast pile to the front card's width; pause rear timers
   until their messages reach the front so queued notifications remain readable.
 - Rename the fork to Clear AppUI (`ycy-0510/clear-appui`), document GitHub

@@ -182,6 +182,7 @@ class AppText extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.appTheme.tokens.typography;
     return Semantics(
+      container: true,
       header: role == AppTextRole.heading || role == AppTextRole.display,
       child: Text(
         data,

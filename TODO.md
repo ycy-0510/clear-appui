@@ -186,7 +186,8 @@
 - [ ] GitHub Actions workflow 更新：本機 `codex/fork-setup` 保留修改；目前 GitHub CLI 憑證缺少 `workflow` scope，遠端先保留原流程。
 - [x] 通用 Agent Skill：先讀真實 API、重用現成元件，再套用 HIG 與共用 theme。
 - [x] Skill 的 API contract、套件內 matching skill 與 doctor 來源解析；本機實測與官方格式驗證通過。
-- [ ] 透過 NPX 實際安裝到 BIOCAB，驗證 Git 套件與 Skill 的相容性。
+- [x] 透過 NPX 實際安裝到 BIOCAB；doctor 確認 Git ref `785b344`、API contract 1 與 matching Skill 相容。
+- [x] AppText 明確隔離 semantics container；標題／操作語意測試與 AppUI 非 Golden 21 項通過。
 
 ## Toast 連續通知修正（2026-10-29）
 
