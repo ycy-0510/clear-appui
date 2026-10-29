@@ -68,6 +68,14 @@ groups and bottom destinations serve different purposes.
 
 HIG informs interaction behavior; it does not require an iOS visual clone.
 Keep FossUI's token-based surfaces, button depth and short press feedback.
+Product buttons compress to 0.95 and navigation content to 0.88 over 100ms,
+returning over 160ms with a restrained spring. On a 22-point icon the previous
+0.97 scale changed less than one point, making feedback hard to see. These are
+configurable AppMotion values. The touch region and sliding selection fill stay
+fixed while content compresses; Reduce Motion keeps final geometry.
+AppCard.onTap uses the same guarded action/feedback path while keeping the card's
+single 16-point content inset. Its body text still wraps and nested footer
+buttons activate independently. Use it for existing actionable summary cards.
 AppButton maintains visible feedback for a quick tap and keyboard activation;
 it gates pending work immediately and only shows a loading state for sustained
 work, avoiding flashes for quick local actions. Activation never waits for motion.

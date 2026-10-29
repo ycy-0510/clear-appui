@@ -49,6 +49,9 @@ contract is an error: use the package's bundled skill rather than guessing.
 - Use AppButton, AppText, AppCard, AppTextField, AppBadge, AppCheckbox,
   AppSwitch and AppListTile where they fit. Use existing Foss* variants for
   lower-level selection, dialogs, menus, progress, or feedback.
+  Use AppCard.onTap for an actionable summary card; it shares button feedback
+  without adding a second content inset. Nested footer buttons keep their own
+  action. Preserve original page wording and section/action order when migrating.
 - Read the package's `doc/app_ui/DESIGN_STYLE.md` before styling. Shared design
   changes belong in the package and this skill, followed by upgrading consumers;
   do not fork typography, spacing or navigation materials inside each app.
@@ -69,6 +72,10 @@ contract is an error: use the package's bundled skill rather than guessing.
   press-scale feedback for quick taps and keyboard activation without painting a
   second selected-looking fill. Floating control groups animate size changes.
   Keep callbacks immediate and support rapid reversal.
+  Keep the content's press compression visible: product buttons default to 0.95,
+  navigation content to 0.88 with a short return spring. The navigation surface
+  itself keeps sliding independently. Do not remove press feedback while styling
+  selected backgrounds; preserve cancellation and Reduce Motion.
 - Use AppListGroup for small groups and AppSliverListGroup for long ones, with
   AppListTile rows. Only the outer group edges are rounded; inner rows share
   the surface with dividers and no per-row corner cutouts. A white canvas must

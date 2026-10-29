@@ -56,14 +56,22 @@ class AppMotion {
   /// Creates a motion scale.
   const AppMotion({
     this.press = const Duration(milliseconds: 100),
-    this.pressedScale = 0.97,
+    this.release = const Duration(milliseconds: 160),
+    this.pressedScale = 0.95,
+    this.navigationPressedScale = 0.88,
   });
 
   /// Short press feedback duration.
   final Duration press;
 
+  /// Return to rest after releasing or cancelling an action.
+  final Duration release;
+
   /// Scale while a pointer remains over an enabled action.
   final double pressedScale;
+
+  /// Navigation content needs a stronger pulse to be visible on small icons.
+  final double navigationPressedScale;
 }
 
 /// Shared layout and interaction dimensions, in logical pixels.

@@ -19,6 +19,39 @@ Widget host(Widget child, {bool reduced = false}) => WidgetsApp(
 );
 
 void main() {
+  testWidgets('an action card wraps text and keeps its child action separate', (
+    tester,
+  ) async {
+    var opens = 0;
+    var continues = 0;
+    await tester.pumpWidget(
+      host(
+        SizedBox(
+          width: 240,
+          child: AppCard(
+            onTap: () => opens++,
+            title: const AppText('Open group'),
+            footer: AppButton(
+              onPressed: () => continues++,
+              child: const Text('Continue'),
+            ),
+            child: const AppText(
+              'A longer group description wraps within the card surface.',
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+    expect(continues, 1);
+    expect(opens, 0);
+    await tester.tap(find.text('Open group'));
+    await tester.pumpAndSettle();
+    expect(opens, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'a quick tap gives visible continuous feedback without a loading flash',
     (tester) async {
@@ -34,7 +67,11 @@ void main() {
           .scale
           .value;
       expect(scale, lessThan(1));
-      expect(scale, greaterThanOrEqualTo(0.97));
+      expect(
+        scale,
+        greaterThanOrEqualTo(AppThemeData.light.motion.pressedScale),
+      );
+      expect(scale, lessThan(0.98));
       expect(
         tester.widget<FossButton>(find.byType(FossButton)).isLoading,
         isFalse,

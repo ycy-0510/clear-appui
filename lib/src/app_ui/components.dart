@@ -41,6 +41,7 @@ class AppButton extends StatefulWidget {
     this.semanticLabel,
     this.onError,
     this.haptic = false,
+    this.contentPadding,
     super.key,
   });
 
@@ -67,6 +68,9 @@ class AppButton extends StatefulWidget {
 
   /// Requests selection feedback through the platform adapter when activated.
   final bool haptic;
+
+  /// Optional content inset; the shared minimum touch target remains in force.
+  final EdgeInsetsGeometry? contentPadding;
 
   @override
   State<AppButton> createState() => _AppButtonState();
@@ -160,10 +164,16 @@ class _AppButtonState extends State<AppButton> {
                 !MediaQuery.disableAnimationsOf(context)
             ? context.appTheme.motion.pressedScale
             : 1,
-        duration: context.appMotion(context.appTheme.motion.press),
+        duration: context.appMotion(
+          _pressed
+              ? context.appTheme.motion.press
+              : context.appTheme.motion.release,
+        ),
+        curve: _pressed ? Curves.easeOutCubic : Curves.easeOutBack,
         child: FossButton(
           style: FossButtonStyle(
             minHeight: context.appTheme.dimensions.touchTarget,
+            padding: widget.contentPadding,
           ),
           onPressed: enabled ? _run : null,
           loading: _busy || widget.loading,
@@ -253,7 +263,14 @@ class AppText extends StatelessWidget {
 /// A composable card using the shared shape and surface tokens.
 class AppCard extends StatelessWidget {
   /// Creates a card containing arbitrary widgets.
-  const AppCard({required this.child, this.title, this.footer, super.key});
+  const AppCard({
+    required this.child,
+    this.title,
+    this.footer,
+    this.onTap,
+    this.semanticLabel,
+    super.key,
+  });
 
   /// Arbitrary body content.
   final Widget child;
@@ -264,10 +281,16 @@ class AppCard extends StatelessWidget {
   /// Optional footer.
   final Widget? footer;
 
+  /// Optional card activation with the same feedback as product buttons.
+  final FutureOr<void> Function()? onTap;
+
+  /// Accessible activation name for an interactive card.
+  final String? semanticLabel;
+
   @override
   Widget build(BuildContext context) {
     final t = context.appTheme.tokens;
-    return DecoratedBox(
+    final surface = DecoratedBox(
       decoration: ShapeDecoration(
         color: _groupedSurface(t),
         shape: RoundedSuperellipseBorder(
@@ -276,8 +299,8 @@ class AppCard extends StatelessWidget {
       ),
       child: Padding(
         padding: t.spacing.all(4),
-        child: DefaultTextStyle.merge(
-          style: TextStyle(color: t.colors.cardForeground),
+        child: DefaultTextStyle(
+          style: t.typography.base.copyWith(color: t.colors.cardForeground),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -286,6 +309,14 @@ class AppCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+    if (onTap == null) return surface;
+    return AppButton(
+      variant: AppButtonVariant.ghost,
+      contentPadding: EdgeInsets.zero,
+      semanticLabel: semanticLabel,
+      onPressed: onTap,
+      child: surface,
     );
   }
 }

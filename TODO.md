@@ -279,3 +279,8 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] FossCheckbox 已提供 48-point 點擊區；本次 AppCheckbox 在 eager／sliver list group 內補上共用 16／4-point 內距，保留 standalone 用法。
 - [x] 更新 portable Skill 與設計文件，避免在產品頁面另補第二層 padding。
 - [ ] 既有元件檢查、消費端升級與 PDF review 預覽驗證。
+
+## 按壓回饋可見度（2026-10-30）
+
+- [x] 將一般按鈕縮放調為 0.95、導航內容 0.88，加入 160ms 回彈；保留滑動底色及穩定點擊區。
+- [ ] 驗證快速點按、中途反向、取消、鍵盤與 Reduce Motion；消費端逐頁比對原版文案／排版。

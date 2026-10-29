@@ -67,6 +67,7 @@ void main() {
       expect(tester.getRect(indicator), start);
       await tester.pump(const Duration(milliseconds: 50));
       expect(scale(), lessThan(1));
+      expect(scale(), lessThan(0.94)); // A 22px icon visibly changes size.
       final middle = tester.getRect(indicator);
       expect(middle.left, greaterThan(start.left));
       expect(middle.left, lessThan(start.left + start.width));

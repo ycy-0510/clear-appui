@@ -1,5 +1,8 @@
 ## Unreleased
 
+- Make product button and navigation-content compression perceptible, with a
+  shared return spring and independent sliding navigation selection surface.
+
 - Inset AppCheckbox rows inside eager/lazy list groups so the control clears the
   rounded group edge, without changing standalone filter checkbox spacing.
 

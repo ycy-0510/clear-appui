@@ -818,10 +818,14 @@ class _NavigationDestinationState extends State<_NavigationDestination> {
             child: AnimatedScale(
               key: ValueKey('app-navigation-press-${widget.item.label}'),
               scale: _pressed && !MediaQuery.disableAnimationsOf(context)
-                  ? context.appTheme.motion.pressedScale
+                  ? context.appTheme.motion.navigationPressedScale
                   : 1,
-              duration: context.appMotion(context.appTheme.motion.press),
-              curve: Curves.easeOutCubic,
+              duration: context.appMotion(
+                _pressed
+                    ? context.appTheme.motion.press
+                    : context.appTheme.motion.release,
+              ),
+              curve: _pressed ? Curves.easeOutCubic : Curves.easeOutBack,
               child: AnimatedContainer(
                 duration: context.appMotion(context.appTheme.motion.press),
                 decoration: ShapeDecoration(

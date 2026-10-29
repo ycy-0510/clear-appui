@@ -107,7 +107,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 120));
       expect(
         tester.widget<AnimatedScale>(find.byType(AnimatedScale)).scale,
-        0.97,
+        AppThemeData.light.motion.pressedScale,
       );
       await gesture.moveBy(const Offset(300, 0));
       await tester.pump(const Duration(milliseconds: 120));
