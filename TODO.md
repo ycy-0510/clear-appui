@@ -279,7 +279,8 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] FossCheckbox 已提供 48-point 點擊區；本次 AppCheckbox 在 eager／sliver list group 內補上共用 16／4-point 內距，保留 standalone 用法。
 - [x] 更新 portable Skill 與設計文件，避免在產品頁面另補第二層 padding。
 - [x] 54 項 AppUI 測試、明暗 Golden 與嚴格 analyze 通過；BIOCAB PDF review 測試確認 16-point 左側內距及 48-point 點擊區。
-- [ ] 最新消費端 PDF review 實際預覽／實機驗證。
+- [x] BIOCAB Preview 實際檢查選取／取消選取的 16-point checkbox 內距，並建立四字詞組。
+- [ ] 新版實機內距／觸控驗收。
 
 ## 按壓回饋可見度（2026-10-30）
 
@@ -287,7 +288,9 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] 55 項 AppUI 測試與嚴格 analyze 通過，包含快速點按、反向、取消、鍵盤、Reduce Motion 與巢狀 action card；保留兩張 Golden。
 - [x] 新增 AppCard onTap／semanticLabel，重用 AppButton 按壓及穩定點擊區；巢狀 footer 不重複觸發。
 - [x] Skill 補上開啟 sheet／route 時立即返回 callback，避免等待選擇期間持續 loading；實際儲存才等待。
-- [ ] 消費端逐頁比對原版文案／排版與新版實機驗收。
+- [x] BIOCAB 恢復原版首頁順序／滿寬操作／詞組進度、兩個評分及解釋層級；最終 50 項測試與分析通過。
+- [x] Widget Preview 實際走過 PDF／詞組分頁／移出取消／學習評分與復原；最後 hot restart 1,945ms 後新操作無 captured console error。
+- [ ] 新版實機動畫／觸控／VoiceOver 驗收及完整原 App 功能搬遷；消費端 FEATURE_AUDIT 明確列出缺項。
 
 
 ## 分組列的獨立操作（2026-10-30）
@@ -296,4 +299,6 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] 本次保留既有 API，為 row 與 trailing 建立分開的 semantics boundary。
 - [x] 56 項 AppUI 與 40 項上游 list-tile 回歸測試通過；原有明暗 CI Golden 保持不變，嚴格 analyze 無問題。
 - [x] 以 SemanticsAction 分別觸發 row／trailing，確認 trailing 不誤觸 row；Skill 驗證通過。
-- [ ] 消費端更新、實際預覽與實機 VoiceOver 驗收。
+- [x] BIOCAB 升級 2e9a0bb、NPX 更新 Skill，doctor 確認一致；50 項 App 測試與嚴格分析通過。
+- [x] 實際 Preview tree 顯示獨立 trailing button，點按開啟移出確認，取消保留原詞組。
+- [ ] 實機 VoiceOver 驗收。
