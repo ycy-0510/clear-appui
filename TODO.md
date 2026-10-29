@@ -226,7 +226,7 @@
 - [x] AppListGroup／AppSliverListGroup：只有群組外緣圓角，中間平直、分隔線、lazy rows。
 - [x] Skill／文件要求保留原版 navigation、設定入口、搜尋模式與捲動範圍，HIG 不當成 iOS 皮膚。
 - [x] AppUI 39 項測試通過，含鍵盤導航淡出／回復、動畫中間影格／反向、RTL、Reduce Motion、鍵盤／取消、底部避讓、群組與 lazy scrolling；兩張 CI 視覺圖已更新及檢視。
-- [ ] 完成消費端升級與 NPX Skill 重新安裝後的 doctor／預覽驗證。
+- [x] BIOCAB 升級至 e222748，NPX 重新安裝 repo 層 Skill；doctor 確認 contract 1 與 matching bytes，預覽確認原版三分頁／字根搜尋／設定返回。
 - [ ] 新版實機動畫、VoiceOver 與效能驗收；不以 Widget tests／Preview 取代。
 
 
@@ -238,7 +238,7 @@
 - [x] 新增 7 項測試；AppUI 共 46 項（含既有兩張 Golden）通過，未變更 Golden 圖。
 - [x] 更新套件範例、設計指南、API 文件與 portable Skill 的前後 scroll inset 規則。
 - [x] 嚴格 analyze 無問題；SDK TickerMode API 更新後 7 項專項再次通過。
-- [ ] 消費端升級、重新安裝 Skill、doctor 與互動 Preview 驗證。
+- [x] BIOCAB 升級與 Skill doctor 匹配；39 項 App 測試及嚴格分析通過，Preview 實際確認透明／毛玻璃、回頂還原與最底列避讓。
 - [ ] 實機視覺、VoiceOver 與效能驗收。
 
 
@@ -248,4 +248,7 @@
 - [x] 移除按壓時另一片 selection 色填滿，保留單一背景滑動；使用與 FossTabs 相同的 easeInOut。
 - [x] 更新共用 Skill 與設計指南，避免消費端自行實作。
 - [x] AppUI 48 項測試（含兩張 Golden）與嚴格 analyze 通過；短按縮放／指示器中間影格、鍵盤與 Reduce Motion 專項通過。
-- [ ] 發佈、消費端升級與 Preview 點按驗證。
+- [x] 發佈 e222748，BIOCAB 使用 matching package／Skill；39 項測試與嚴格 analyze 通過，Preview 實際點按三分頁與來回切換保留 scroll。
+
+
+Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFlutterView assertion，瀏覽器 refresh 後恢復，後續新 session 操作無錯誤。未宣稱 SDK 問題已修復；新版實機驗收仍待完成。
