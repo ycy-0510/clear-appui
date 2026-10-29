@@ -522,7 +522,7 @@ class AppNavigationBar extends StatelessWidget {
                         AnimatedPositionedDirectional(
                           key: const ValueKey('app-navigation-indicator'),
                           duration: duration,
-                          curve: Curves.easeOutCubic,
+                          curve: Curves.easeInOut,
                           start: cellWidth * selectedIndex,
                           width: cellWidth,
                           top: 0,
@@ -706,9 +706,40 @@ class _NavigationDestinationState extends State<_NavigationDestination> {
   bool _pressed = false;
   bool _hovered = false;
   bool _focused = false;
+  Timer? _release;
+  DateTime? _pressedAt;
 
   void _press(bool value) {
+    _release?.cancel();
+    if (value && !_pressed) _pressedAt = DateTime.now();
     if (value != _pressed) setState(() => _pressed = value);
+  }
+
+  void _finishPress() {
+    if (!_pressed) return;
+    final elapsed = DateTime.now().difference(_pressedAt ?? DateTime.now());
+    final remaining =
+        context.appMotion(context.appTheme.motion.press) - elapsed;
+    _release?.cancel();
+    if (remaining > Duration.zero) {
+      _release = Timer(remaining, () {
+        if (mounted) _press(false);
+      });
+    } else {
+      _press(false);
+    }
+  }
+
+  void _activate() {
+    _press(true);
+    _finishPress();
+    widget.onActivate();
+  }
+
+  @override
+  void dispose() {
+    _release?.cancel();
+    super.dispose();
   }
 
   @override
@@ -752,7 +783,7 @@ class _NavigationDestinationState extends State<_NavigationDestination> {
       button: true,
       selected: widget.selected,
       label: widget.item.label,
-      onTap: widget.onActivate,
+      onTap: _activate,
       excludeSemantics: true,
       child: FocusableActionDetector(
         mouseCursor: SystemMouseCursors.click,
@@ -765,7 +796,7 @@ class _NavigationDestinationState extends State<_NavigationDestination> {
         actions: {
           ActivateIntent: CallbackAction<ActivateIntent>(
             onInvoke: (_) {
-              widget.onActivate();
+              _activate();
               return null;
             },
           ),
@@ -777,38 +808,45 @@ class _NavigationDestinationState extends State<_NavigationDestination> {
             final box = context.findRenderObject()! as RenderBox;
             _press((Offset.zero & box.size).contains(event.localPosition));
           },
-          onPointerUp: (_) => _press(false),
+          onPointerUp: (_) => _finishPress(),
           onPointerCancel: (_) => _press(false),
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             excludeFromSemantics: true,
-            onTap: widget.onActivate,
-            child: AnimatedContainer(
+            onTap: _activate,
+            onTapCancel: () => _press(false),
+            child: AnimatedScale(
+              key: ValueKey('app-navigation-press-${widget.item.label}'),
+              scale: _pressed && !MediaQuery.disableAnimationsOf(context)
+                  ? context.appTheme.motion.pressedScale
+                  : 1,
               duration: context.appMotion(context.appTheme.motion.press),
-              decoration: ShapeDecoration(
-                color: _pressed
-                    ? t.colors.primary.withValues(alpha: 0.18)
-                    : _hovered
-                    ? t.colors.secondary
-                    : const Color(0x00000000),
-                shape: StadiumBorder(
-                  side: _focused
-                      ? BorderSide(color: t.colors.ring, width: 2)
-                      : BorderSide.none,
+              curve: Curves.easeOutCubic,
+              child: AnimatedContainer(
+                duration: context.appMotion(context.appTheme.motion.press),
+                decoration: ShapeDecoration(
+                  color: _hovered
+                      ? t.colors.foreground.withValues(alpha: 0.035)
+                      : const Color(0x00000000),
+                  shape: StadiumBorder(
+                    side: _focused
+                        ? BorderSide(color: t.colors.ring, width: 2)
+                        : BorderSide.none,
+                  ),
                 ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                child: widget.horizontal
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 8,
+                        children: content,
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 3,
+                        children: content,
+                      ),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              child: widget.horizontal
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 8,
-                      children: content,
-                    )
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 3,
-                      children: content,
-                    ),
             ),
           ),
         ),

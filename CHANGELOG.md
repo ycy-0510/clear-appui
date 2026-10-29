@@ -1,5 +1,8 @@
 ## Unreleased
 
+- Restore brief navigation press-scale feedback for quick taps and keyboard
+  activation; remove competing pressed fills and use FossTabs' selection easing.
+
 - Overlay top controls with a transparent-at-rest, progressively frosted scroll
   backdrop. Advertise measured top clearance and restore retained page material;
   honor reduced motion and high contrast without duplicating consumer styling.

@@ -240,3 +240,12 @@
 - [x] 嚴格 analyze 無問題；SDK TickerMode API 更新後 7 項專項再次通過。
 - [ ] 消費端升級、重新安裝 Skill、doctor 與互動 Preview 驗證。
 - [ ] 實機視覺、VoiceOver 與效能驗收。
+
+
+## 底部按壓與滑動回饋補正（2026-10-29）
+
+- [x] 補回底部 destination 短按／鍵盤縮放 pulse；callback 立即執行，取消後回復。
+- [x] 移除按壓時另一片 selection 色填滿，保留單一背景滑動；使用與 FossTabs 相同的 easeInOut。
+- [x] 更新共用 Skill 與設計指南，避免消費端自行實作。
+- [x] AppUI 48 項測試（含兩張 Golden）與嚴格 analyze 通過；短按縮放／指示器中間影格、鍵盤與 Reduce Motion 專項通過。
+- [ ] 發佈、消費端升級與 Preview 點按驗證。

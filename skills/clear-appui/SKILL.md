@@ -61,8 +61,10 @@ contract is an error: use the package's bundled skill rather than guessing.
   search/filter controls and lazy results in one CustomScrollView when the
   original page scrolls as a unit; use SliverToBoxAdapter and AppSliverListGroup.
 - Use AppNavigationBody to retain destination state during a crossfade. The
-  bar has one persistent sliding selection surface; floating control groups
-  animate size changes. Keep callbacks immediate and support rapid reversal.
+  bar has one persistent sliding selection surface. Destinations retain brief
+  press-scale feedback for quick taps and keyboard activation without painting a
+  second selected-looking fill. Floating control groups animate size changes.
+  Keep callbacks immediate and support rapid reversal.
 - Use AppListGroup for small groups and AppSliverListGroup for long ones, with
   AppListTile rows. Only the outer group edges are rounded; inner rows share
   the surface with dividers and no per-row corner cutouts. For segmented search

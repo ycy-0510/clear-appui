@@ -73,8 +73,11 @@ it gates pending work immediately and only shows a loading state for sustained
 work, avoiding flashes for quick local actions. Activation never waits for motion.
 
 AppNavigationBar owns one persistent selection surface. It slides and resizes
-instead of toggling separate selected backgrounds. AppTopBar groups and bottom
-chrome animate geometry changes. Keyboard visibility fades navigation out/in
+instead of toggling separate selected backgrounds. Destinations briefly scale
+on quick tap or keyboard activation, retaining FossUI's press feedback. Pressing
+does not paint another selection-colored background at the target: the existing
+selection surface moves there using the same easing as FossTabs. AppTopBar groups
+and bottom chrome animate geometry changes. Keyboard visibility fades navigation out/in
 while immediately disabling hidden controls. Rapid changes retarget motion.
 AppNavigationBody crossfades stable destinations and excludes outgoing pages
 from input, focus and semantics. Reduce Motion lays out final geometry directly.

@@ -3,18 +3,22 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fossui/app_ui.dart';
 
-Widget _host(Widget child, {double scale = 1}) => WidgetsApp(
-  color: const Color(0xFFFFFFFF),
-  pageRouteBuilder: <T>(settings, builder) => PageRouteBuilder<T>(
-    settings: settings,
-    pageBuilder: (context, _, _) => builder(context),
-  ),
-  builder: (context, route) => MediaQuery(
-    data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
-    child: route!,
-  ),
-  home: AppTheme(child: child),
-);
+Widget _host(Widget child, {double scale = 1, bool reduced = false}) =>
+    WidgetsApp(
+      color: const Color(0xFFFFFFFF),
+      pageRouteBuilder: <T>(settings, builder) => PageRouteBuilder<T>(
+        settings: settings,
+        pageBuilder: (context, _, _) => builder(context),
+      ),
+      builder: (context, route) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          textScaler: TextScaler.linear(scale),
+          disableAnimations: reduced,
+        ),
+        child: route!,
+      ),
+      home: AppTheme(child: child),
+    );
 
 const _items = [
   AppNavigationItem(label: 'Courses', icon: SizedBox.square(dimension: 22)),
@@ -22,6 +26,95 @@ const _items = [
 ];
 
 void main() {
+  testWidgets(
+    'quick navigation tap shrinks while one selection surface slides',
+    (tester) async {
+      var selected = 0;
+      await tester.pumpWidget(
+        _host(
+          StatefulBuilder(
+            builder: (context, update) => Align(
+              alignment: Alignment.bottomCenter,
+              child: AppNavigationBar(
+                items: _items,
+                selectedIndex: selected,
+                haptic: false,
+                onSelected: (value) => update(() => selected = value),
+              ),
+            ),
+          ),
+        ),
+      );
+      final indicator = find.byKey(
+        const ValueKey('app-navigation-indicator-surface'),
+      );
+      final destination = find.byKey(
+        const ValueKey('app-navigation-press-Components'),
+      );
+      double scale() => tester
+          .widget<ScaleTransition>(
+            find.descendant(
+              of: destination,
+              matching: find.byType(ScaleTransition),
+            ),
+          )
+          .scale
+          .value;
+      final start = tester.getRect(indicator);
+      await tester.tap(find.text('Components'));
+      expect(selected, 1); // Navigation never waits for visual feedback.
+      await tester.pump();
+      expect(tester.getRect(indicator), start);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(scale(), lessThan(1));
+      final middle = tester.getRect(indicator);
+      expect(middle.left, greaterThan(start.left));
+      expect(middle.left, lessThan(start.left + start.width));
+      expect(indicator, findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(scale(), 1);
+      expect(
+        tester.getRect(indicator).left,
+        closeTo(start.left + start.width, 0.01),
+      );
+    },
+  );
+
+  testWidgets('keyboard navigation pulses and reduced motion stays still', (
+    tester,
+  ) async {
+    for (final reduced in [false, true]) {
+      var calls = 0;
+      await tester.pumpWidget(
+        _host(
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: AppNavigationBar(
+              key: ValueKey(reduced),
+              items: _items,
+              selectedIndex: 0,
+              haptic: false,
+              onSelected: (_) => calls++,
+            ),
+          ),
+          reduced: reduced,
+        ),
+      );
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      final scales = tester
+          .widgetList<ScaleTransition>(find.byType(ScaleTransition))
+          .map((widget) => widget.scale.value);
+      expect(calls, 1);
+      expect(scales, reduced ? everyElement(1.0) : contains(lessThan(1.0)));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }
+  });
+
   testWidgets('the entire destination responds, including its empty edges', (
     tester,
   ) async {
