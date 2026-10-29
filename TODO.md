@@ -302,3 +302,21 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] BIOCAB 升級 2e9a0bb、NPX 更新 Skill，doctor 確認一致；50 項 App 測試與嚴格分析通過。
 - [x] 實際 Preview tree 顯示獨立 trailing button，點按開啟移出確認，取消保留原詞組。
 - [ ] 實機 VoiceOver 驗收。
+
+## BIOCAB 原版功能對齊（2026-10-30，本機開發）
+
+- [x] 消費端使用既有 AppUI 群組、按鈕、Tabs、Sheet 與整頁 Sliver，保留共用元件的按壓／轉場及灰色分組底色。
+- [x] 原版 PDF 講義流程已接上持久草稿、候選詞、分處中文、原生編輯／匯出呼叫及詞組更新；離開頁面保留掃描任務。
+- [x] Widget Preview 實際操作候選詞、中文修改與輸出模式，保存畫面；預覽使用相同的正式提示模式資料。
+- [ ] 完整 iOS 功能對齊仍未完成。原生 PDF 手勢、背景／冷啟動、分享、獨立 extension、帳號／同步／音訊等，依 BIOCAB 的來源對照清單逐項驗收，不能以編譯通過取代。
+
+此記錄是消費端整合進度，不代表上方 AppUI roadmap 的未完成項目已交付。
+- [x] 本輪消費端最終驗證：94 項測試通過、靜態分析無問題、獨立 iPhoneOS 未簽章版本編譯通過；未安裝／更新手機 App。
+
+## 外部工作與面板協調（2026-10-30）
+
+- [x] 共用 host 提供唯讀 presentationCountListenable，關閉動畫結束前仍列為開啟。
+- [x] showAppSheet / host 支援 onBeforeDismiss：非同步保存失敗可保留面板，重複返回／關閉不重複提交；非空結果可明確完成操作。
+- [x] 返回、Escape、背景取消、保存錯誤重試、等待期間路由移除測試通過。
+- [x] 共用 Skill 與設計文件更新；105 項 AppUI／上游 list tile（含既有 CI Golden）回歸及嚴格分析通過。
+- [ ] 消費端外部 PDF 輸入、掃描恢復及實機驗收另行記錄，不以 host 測試代替。

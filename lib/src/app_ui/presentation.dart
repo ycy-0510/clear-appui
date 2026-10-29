@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
+import 'package:flutter/foundation.dart' show ValueListenable, ValueNotifier;
 import 'package:flutter/gestures.dart'
     show DragStartBehavior, kMinFlingVelocity;
 import 'package:flutter/services.dart';
@@ -40,10 +41,16 @@ class AppPresentationHost extends StatefulWidget {
 class AppPresentationHostState extends State<AppPresentationHost>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   final _entries = <_Presentation>[];
+  final _presentationCount = ValueNotifier<int>(0);
   final _drag = AppDragCoordinator();
 
   /// Number of currently open presentations.
   int get presentationCount => _entries.length;
+
+  /// Read-only count of open or exiting presentations, for route coordination.
+  /// Observe this host's lifecycle; the listenable is disposed with the host.
+  /// Queue any follow-up UI work after the current frame.
+  ValueListenable<int> get presentationCountListenable => _presentationCount;
 
   @override
   void initState() {
@@ -52,26 +59,31 @@ class AppPresentationHostState extends State<AppPresentationHost>
   }
 
   /// Opens a presentation above the page, preserving typed results.
+  /// A null-result dismissal can await [onBeforeDismiss]; false retains it.
+  /// A non-null result bypasses the guard. Backgrounding or disposal cancels
+  /// immediately, so callers must retain durable work independently.
   Future<T?> show<T>({
     required WidgetBuilder builder,
     bool modal = true,
     bool dismissible = true,
     String barrierLabel = '關閉面板',
+    FutureOr<bool> Function()? onBeforeDismiss,
   }) {
     final entry = _Presentation(
       builder: builder,
       modal: modal,
       dismissible: dismissible,
       barrierLabel: barrierLabel,
+      onBeforeDismiss: onBeforeDismiss,
       previousFocus: FocusManager.instance.primaryFocus,
       animation: AnimationController(
         vsync: this,
         duration: context.appMotion(context.appTheme.tokens.motion.overlay),
       ),
     );
-    entry.history = LocalHistoryEntry(onRemove: () => _close(entry));
-    ModalRoute.of(context)?.addLocalHistoryEntry(entry.history!);
+    _attachHistory(entry);
     setState(() => _entries.add(entry));
+    _presentationCount.value = _entries.length;
     entry.animation.forward();
     return entry.result.future.then((value) => value as T?);
   }
@@ -81,8 +93,54 @@ class AppPresentationHostState extends State<AppPresentationHost>
     if (_entries.isNotEmpty) _close(_entries.last, result);
   }
 
+  void _attachHistory(_Presentation entry) {
+    entry.history = LocalHistoryEntry(
+      onRemove: () {
+        entry.history = null;
+        if (mounted && _entries.contains(entry) && !entry.closing) {
+          // Keep Back routed to this presentation during an asynchronous veto.
+          _attachHistory(entry);
+          _close(entry);
+        }
+      },
+    );
+    ModalRoute.of(context)?.addLocalHistoryEntry(entry.history!);
+  }
+
   void _close(_Presentation entry, [Object? result]) {
-    if (!_entries.contains(entry) || entry.closing) return;
+    if (!_entries.contains(entry) || entry.closing || entry.checkingDismiss) {
+      return;
+    }
+    if (result == null && entry.onBeforeDismiss != null) {
+      entry.checkingDismiss = true;
+      unawaited(_checkDismiss(entry));
+      return;
+    }
+    _beginClose(entry, result);
+  }
+
+  Future<void> _checkDismiss(_Presentation entry) async {
+    var allowed = false;
+    try {
+      allowed = await entry.onBeforeDismiss!();
+    } catch (error, stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          library: 'AppUI',
+          context: ErrorDescription('while checking presentation dismissal'),
+        ),
+      );
+    } finally {
+      entry.checkingDismiss = false;
+    }
+    if (allowed && mounted && _entries.contains(entry) && !entry.closing) {
+      _beginClose(entry);
+    }
+  }
+
+  void _beginClose(_Presentation entry, [Object? result]) {
     _drag.cancel();
     setState(() => entry.closing = true);
     entry.history?.remove();
@@ -102,6 +160,7 @@ class AppPresentationHostState extends State<AppPresentationHost>
     if (!_entries.contains(entry)) return;
     final wasTop = identical(_entries.last, entry);
     setState(() => _entries.remove(entry));
+    _presentationCount.value = _entries.length;
     entry.animation.dispose();
     entry.history?.remove();
     if (!entry.result.isCompleted) entry.result.complete(result);
@@ -131,6 +190,7 @@ class AppPresentationHostState extends State<AppPresentationHost>
       if (!entry.result.isCompleted) entry.result.complete();
     }
     _drag.dispose();
+    _presentationCount.dispose();
     super.dispose();
   }
 
@@ -228,6 +288,7 @@ class _Presentation {
     required this.modal,
     required this.dismissible,
     required this.barrierLabel,
+    required this.onBeforeDismiss,
     required this.previousFocus,
     required this.animation,
   });
@@ -235,6 +296,8 @@ class _Presentation {
   final bool modal;
   final bool dismissible;
   final String barrierLabel;
+  final FutureOr<bool> Function()? onBeforeDismiss;
+  bool checkingDismiss = false;
   final FocusNode? previousFocus;
   final AnimationController animation;
   bool closing = false;
@@ -388,10 +451,12 @@ Future<T?> showAppSheet<T>({
   required WidgetBuilder builder,
   bool modal = true,
   bool dismissible = true,
+  FutureOr<bool> Function()? onBeforeDismiss,
 }) => AppPresentationHost.of(context).show<T>(
   builder: builder,
   modal: modal,
   dismissible: dismissible,
+  onBeforeDismiss: onBeforeDismiss,
 );
 
 /// A resizable sheet that coordinates its scrollable body with drag sessions.

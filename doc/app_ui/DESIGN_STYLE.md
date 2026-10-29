@@ -160,3 +160,19 @@ disposal complete outstanding results immediately. Sheet surfaces keep a stable
 BackdropFilter parent, toggling its enabled state as opacity changes; replacing
 that parent at full height disposes the active gesture and causes a failed first
 pull. A continuous downward pull can resize and dismiss from the handle or body.
+
+
+## Deferred presentation coordination
+
+Incoming work must respect an active editor or route transition. Observe the
+route host's read-only presentationCountListenable, which includes exiting
+presentations until their animations finish. Schedule follow-up UI after the
+frame once the current host reaches zero. Unsubscribe within the host's route
+lifecycle; do not poll its stack or create a second presentation host for the
+same route.
+
+Use showAppSheet.onBeforeDismiss for an asynchronous null-result dismissal
+check. False leaves the sheet open, and repeated Back/Close cannot run concurrent
+checks. Return non-null explicit results for actions that intentionally bypass
+this guard. Backgrounding or route disposal cancels immediately; durable work
+must remain recoverable outside the presentation.

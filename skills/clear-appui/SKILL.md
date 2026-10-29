@@ -94,7 +94,16 @@ contract is an error: use the package's bundled skill rather than guessing.
   add a second page-specific inset around AppCheckbox.
 - Put AppPresentationHost inside the relevant route. Present sheets through
   showAppSheet; connect the supplied ScrollController to the sheet body. Share
-  that host's drag coordinator across page and sheet. The host owns animated
+  that host's drag coordinator across page and sheet. For deferred incoming
+  work, observe the current host's presentationCountListenable and wait until
+  it reaches zero; exiting sheets remain counted until their animation finishes.
+  Queue follow-up presentation after the frame, respect the route/account
+  lifecycle and unsubscribe before the host is disposed. Do not poll for an
+  empty sheet stack or replace a user's active editor. When dismissal must first
+  persist a draft, pass onBeforeDismiss to showAppSheet; return false to retain
+  the editor after a failure. Non-null explicit results bypass that guard.
+  Backgrounding/route disposal still cancels immediately, so retain unfinished
+  work independently and account-check any continuation. The host owns animated
   entry/exit and waits for exit before completing results. Keep the gesture subtree
   mounted when material changes; toggling a blur parent can cancel the first drag.
   Verify the first continuous pull from full height through translucent detents.
