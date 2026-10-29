@@ -228,3 +228,15 @@
 - [x] AppUI 39 項測試通過，含鍵盤導航淡出／回復、動畫中間影格／反向、RTL、Reduce Motion、鍵盤／取消、底部避讓、群組與 lazy scrolling；兩張 CI 視覺圖已更新及檢視。
 - [ ] 完成消費端升級與 NPX Skill 重新安裝後的 doctor／預覽驗證。
 - [ ] 新版實機動畫、VoiceOver 與效能驗收；不以 Widget tests／Preview 取代。
+
+
+## 上方透明／毛玻璃捲動背景（2026-10-29）
+
+- [x] 本次實作：AppScaffold 將 topBar 改成 overlay；viewport 延伸到上緣，MediaQuery 提供實際量測的 top clearance。
+- [x] 頂端透明，垂直捲動後連續浮現局部毛玻璃／主題色 tint，回頂還原；保留獨立返回與右側群組。
+- [x] 分頁切換恢復各頁 scroll material；忽略巢狀／水平捲動，支援 Reduce Motion 與 High Contrast。
+- [x] 新增 7 項測試；AppUI 共 46 項（含既有兩張 Golden）通過，未變更 Golden 圖。
+- [x] 更新套件範例、設計指南、API 文件與 portable Skill 的前後 scroll inset 規則。
+- [x] 嚴格 analyze 無問題；SDK TickerMode API 更新後 7 項專項再次通過。
+- [ ] 消費端升級、重新安裝 Skill、doctor 與互動 Preview 驗證。
+- [ ] 實機視覺、VoiceOver 與效能驗收。

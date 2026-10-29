@@ -243,7 +243,7 @@ class _AppCourseDemoState extends State<AppCourseDemo> {
         key: const PageStorageKey('course-list'),
         padding: EdgeInsets.fromLTRB(
           20,
-          8,
+          MediaQuery.paddingOf(context).top + 8,
           20,
           MediaQuery.paddingOf(context).bottom + 24,
         ),
@@ -373,7 +373,7 @@ class _AppCourseDemoState extends State<AppCourseDemo> {
                     ),
                   ],
                 ),
-                body: IndexedStack(
+                body: AppNavigationBody(
                   index: _tab,
                   children: [
                     Builder(builder: _coursePage),
@@ -469,7 +469,7 @@ class AppComponentGallery extends StatelessWidget {
         key: const PageStorageKey('component-gallery'),
         padding: EdgeInsets.fromLTRB(
           20,
-          8,
+          MediaQuery.paddingOf(context).top + 8,
           20,
           MediaQuery.paddingOf(context).bottom + 24,
         ),

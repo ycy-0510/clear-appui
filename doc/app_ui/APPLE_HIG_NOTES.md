@@ -92,3 +92,16 @@ search and results scroll together uses one sliver viewport. The viewport can
 extend under floating controls; trailing scroll padding lets the last row clear
 both controls and device insets. Grouped lists round only exterior group corners.
 HIG references do not authorize changing the host app's information architecture.
+
+
+## Top scroll backdrop
+
+AppScaffold keeps the scroll viewport behind top controls. Leading content
+padding includes the measured controls and system top inset. The top area is
+transparent at rest and progressively gains a clipped frosted tint as the page
+scrolls, preserving context without moving or replacing the controls. High
+Contrast uses an opaque final tint; Reduce Motion removes temporal interpolation.
+The 48-point transition distance, 12-point blur and tint opacity are product
+implementation choices in the shared component, not Apple-prescribed metrics.
+See [Scroll views](https://developer.apple.com/design/human-interface-guidelines/scroll-views)
+for scroll-edge context and content visibility guidance.

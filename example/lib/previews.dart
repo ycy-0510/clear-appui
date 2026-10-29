@@ -4,7 +4,7 @@ import 'package:fossui/app_ui.dart';
 import 'package:fossui/app_ui_showcase.dart';
 import 'package:fossui_example/upstream_gallery.dart';
 
-/// Opaque floating groups, compact typography and aligned content insets.
+/// Floating groups and a transparent-to-frosted scroll edge.
 @Preview(
   name: 'Floating top controls',
   group: 'AppUI / Navigation',
@@ -34,17 +34,23 @@ Widget floatingTopControls() => AppTheme(
           ),
         ],
       ),
-      body: ListView(
-        padding: context.appTheme.tokens.spacing.all(4),
-        children: const [
-          AppText('Library', role: AppTextRole.display),
-          SizedBox(height: 16),
-          AppCard(
-            child: AppText(
-              'Page titles stay in the content. Actions share a surface.',
+      body: Builder(
+        builder: (context) => ListView(
+          padding:
+              MediaQuery.paddingOf(context) +
+              context.appTheme.tokens.spacing.all(4),
+          children: const [
+            AppText('Library', role: AppTextRole.display),
+            SizedBox(height: 16),
+            AppCard(
+              child: AppText(
+                'Scroll behind the floating controls '
+                'to reveal the frosted edge.',
+              ),
             ),
-          ),
-        ],
+            SizedBox(height: 1000),
+          ],
+        ),
       ),
     ),
   ),

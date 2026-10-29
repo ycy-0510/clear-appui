@@ -50,11 +50,13 @@ contract is an error: use the package's bundled skill rather than guessing.
   do not fork typography, spacing or navigation materials inside each app.
 - Use AppTopBar for top navigation: Back/Close has one floating leading surface;
   all trailing actions share one floating capsule. Keep titles in page content,
-  leave the space between groups unpainted, and use the opaque library surface.
-  Do not create a separate floating tile for every trailing icon or add glass/blur.
-- Use AppScaffold and AppNavigationBar for product page chrome. Preserve bottom
-  content reachability using the scaffold's advertised MediaQuery padding as
-  trailing scroll space. Do not shrink the viewport above floating navigation or
+  retain the library's grouped capsule surfaces. AppScaffold owns the top backdrop:
+  transparent at rest, progressively frosted when page content scrolls behind it.
+  Do not implement per-screen blur or a separate tile for every trailing icon.
+- Use AppScaffold and AppNavigationBar for product page chrome. Preserve the
+  scaffold's MediaQuery top/bottom padding as leading/trailing scroll content;
+  obtain these insets from a context inside the scaffold body. Default ListView
+  padding consumes them; explicit padding and slivers must retain them. Do not shrink the viewport above floating navigation or
   use bottom SafeArea to cut off scrolling content. Put scrolling headers,
   search/filter controls and lazy results in one CustomScrollView when the
   original page scrolls as a unit; use SliverToBoxAdapter and AppSliverListGroup.

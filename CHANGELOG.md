@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Overlay top controls with a transparent-at-rest, progressively frosted scroll
+  backdrop. Advertise measured top clearance and restore retained page material;
+  honor reduced motion and high contrast without duplicating consumer styling.
+
 - Animate one persistent navigation indicator and floating control geometry;
   retain destination state with AppNavigationBody and improve brief button feedback.
 - Add AppListGroup/AppSliverListGroup with continuous interior rows; let page

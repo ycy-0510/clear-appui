@@ -37,11 +37,17 @@ from Widget Preview.
 
 Use `AppTopBar` inside `AppScaffold.topBar`. A leading Back/Close action has its
 own floating surface. Trailing actions share a single capsule. The gap between
-them has no bar background. Place the page title in the content below the controls.
+them is transparent at the top of the page. Place the page title in scrolling content.
 
-The arrangement takes cues from modern iOS control grouping. It uses an opaque
-surface, a subtle border and shadow; there is no glass material, transparency or
-backdrop blur. Trailing icons belong to one surface, not separate floating tiles.
+The action capsules retain FossUI's opaque themed surface, subtle border and
+shadow. AppScaffold overlays them above the page: content can scroll behind them.
+The surrounding top area starts transparent and smoothly gains a frosted, tinted
+backdrop over the first 48 logical pixels of vertical page scrolling. Returning
+to the top clears it again. The blur is clipped to the measured top area, including
+the device's top inset. This is a restrained backdrop, without refraction or
+Liquid Glass simulation. High Contrast replaces blur with an opaque final tint;
+Reduce Motion applies the scroll state directly. These values are product choices.
+Trailing icons belong to one surface, not separate floating tiles.
 Each action retains its own accessible label, keyboard focus and touch target.
 When space is constrained, the trailing group scrolls instead of overlapping Back.
 
@@ -79,9 +85,13 @@ Preserve the host app's destinations, settings entry points, search modes and
 scroll boundaries during migration. Do not move settings into bottom navigation
 or pin an originally scrolling search/filter area without an explicit redesign.
 
-AppScaffold lets the body extend behind floating bottom controls to the device
-edge. Its MediaQuery bottom padding represents the navigation and device inset;
-consume it as trailing scroll content. Do not use a bottom SafeArea to reduce
+AppScaffold lets the body extend behind top and bottom controls to the device
+edges. Its MediaQuery top padding includes the measured top controls and device
+inset; consume it as leading scroll content. Bottom padding represents navigation
+and the device inset; consume it as trailing scroll content. Default ListView
+padding does this automatically. Explicit padding and slivers must retain both.
+AppNavigationBody restores the top material for each retained page's scroll offset;
+nested and horizontal scrolling do not drive the page's top edge. Do not use a bottom SafeArea to reduce
 the viewport above the floating bar. The final row must scroll fully above it.
 For a page that scrolls as one unit, use CustomScrollView, SliverToBoxAdapter
 for headers/filters and AppSliverListGroup for lazy results. Avoid nested vertical

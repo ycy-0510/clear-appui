@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fossui/src/app_ui/components.dart';
@@ -57,7 +59,7 @@ class AppTopBarAction {
 /// Separate floating leading and trailing controls with an unpainted gap.
 ///
 /// The trailing actions share one opaque capsule. Place the page title in its
-/// content; this widget provides neither glass material nor backdrop blur.
+/// content. AppScaffold supplies the scroll-driven frosted backdrop behind it.
 class AppTopBar extends StatelessWidget {
   /// Creates route-level floating controls.
   const AppTopBar({this.leading, this.actions = const [], super.key});
@@ -152,7 +154,7 @@ class AppTopBar extends StatelessWidget {
 }
 
 /// Shared page chrome, safe areas, keyboard handling and floating navigation.
-class AppScaffold extends StatelessWidget {
+class AppScaffold extends StatefulWidget {
   /// Creates a page. Scroll views should consume MediaQuery padding.
   const AppScaffold({
     required this.body,
@@ -162,10 +164,10 @@ class AppScaffold extends StatelessWidget {
     super.key,
   });
 
-  /// Main content; may paint below the floating navigation.
+  /// Main content; may paint behind both top and bottom controls.
   final Widget body;
 
-  /// Optional fixed top content.
+  /// Floating top content with a transparent-to-frosted scroll edge.
   final Widget? topBar;
 
   /// Floating bottom navigation.
@@ -175,13 +177,60 @@ class AppScaffold extends StatelessWidget {
   final AppNavigationMode navigationMode;
 
   @override
+  State<AppScaffold> createState() => _AppScaffoldState();
+}
+
+class _AppScaffoldState extends State<AppScaffold> {
+  final _scrollOffset = ValueNotifier<double>(0);
+  double _topHeight = 0;
+
+  void _setScrollOffset(double offset) {
+    _scrollOffset.value = math.max(0, offset);
+  }
+
+  bool _observeScroll(ScrollNotification notification) {
+    final source = notification.context;
+    if (notification.depth == 0 &&
+        notification.metrics.axis == Axis.vertical &&
+        source != null &&
+        source.findAncestorStateOfType<_AppScaffoldState>() == this &&
+        TickerMode.getValuesNotifier(source).value.enabled) {
+      _setScrollOffset(
+        notification.metrics.pixels - notification.metrics.minScrollExtent,
+      );
+    }
+    return false;
+  }
+
+  bool _observeMetrics(ScrollMetricsNotification notification) {
+    final source = notification.context;
+    if (notification.depth == 0 &&
+        notification.metrics.axis == Axis.vertical &&
+        source.findAncestorStateOfType<_AppScaffoldState>() == this &&
+        TickerMode.getValuesNotifier(source).value.enabled) {
+      _setScrollOffset(
+        notification.metrics.pixels - notification.metrics.minScrollExtent,
+      );
+    }
+    return false;
+  }
+
+  @override
+  void dispose() {
+    _scrollOffset.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = context.appTheme;
     final media = MediaQuery.of(context);
+    final navigation = widget.navigation;
+    final keyboard = media.viewInsets.bottom > 0;
     final bottom =
         navigation != null &&
-            media.viewInsets.bottom == 0 &&
-            navigationMode == AppNavigationMode.reservedSpace
+            !keyboard &&
+            widget.navigationMode == AppNavigationMode.reservedSpace
         ? math.max(
                 theme.dimensions.navigationExtent,
                 navigation is AppNavigationBar
@@ -190,36 +239,108 @@ class AppScaffold extends StatelessWidget {
                     : 0.0,
               ) +
               media.padding.bottom
-        : media.viewInsets.bottom > 0
+        : keyboard
         ? 0.0
         : media.padding.bottom;
-    final keyboard = media.viewInsets.bottom > 0;
     return ColoredBox(
       color: theme.tokens.colors.background,
       child: SafeArea(
+        top: false,
         bottom: false,
         child: Stack(
           fit: StackFit.expand,
           children: [
             Padding(
               padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
-              child: Column(
-                children: [
-                  ?topBar,
-                  Expanded(
-                    child: Builder(
-                      builder: (context) => MediaQuery(
-                        data: MediaQuery.of(context).copyWith(
-                          padding: EdgeInsets.only(bottom: bottom),
-                          viewInsets: EdgeInsets.zero,
+              child: NotificationListener<_AppPageScrollNotification>(
+                onNotification: (notification) {
+                  _setScrollOffset(notification.offset);
+                  return true;
+                },
+                child: NotificationListener<ScrollMetricsNotification>(
+                  onNotification: _observeMetrics,
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: _observeScroll,
+                    child: MediaQuery(
+                      data: media.copyWith(
+                        padding: EdgeInsets.only(
+                          top:
+                              media.padding.top +
+                              (widget.topBar == null ? 0 : _topHeight),
+                          bottom: bottom,
                         ),
-                        child: body,
+                        viewInsets: EdgeInsets.zero,
                       ),
+                      child: widget.body,
                     ),
                   ),
-                ],
+                ),
               ),
             ),
+            if (widget.topBar case final topBar?)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ClipRect(
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: ValueListenableBuilder<double>(
+                            valueListenable: _scrollOffset,
+                            builder: (context, offset, _) =>
+                                TweenAnimationBuilder<double>(
+                                  tween: Tween(
+                                    end: (offset / theme.tokens.spacing(12))
+                                        .clamp(0.0, 1.0),
+                                  ),
+                                  duration: context.appMotion(
+                                    theme.motion.press,
+                                  ),
+                                  curve: Curves.easeOutCubic,
+                                  builder: (context, amount, _) {
+                                    final highContrast = media.highContrast;
+                                    final tint = ColoredBox(
+                                      key: const ValueKey(
+                                        'app-top-scroll-tint',
+                                      ),
+                                      color: theme.tokens.colors.background
+                                          .withValues(
+                                            alpha:
+                                                amount *
+                                                (highContrast ? 1 : 0.84),
+                                          ),
+                                    );
+                                    return amount == 0 || highContrast
+                                        ? tint
+                                        : BackdropFilter(
+                                            filter: ui.ImageFilter.blur(
+                                              sigmaX: 12 * amount,
+                                              sigmaY: 12 * amount,
+                                            ),
+                                            child: tint,
+                                          );
+                                  },
+                                ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: media.padding.top),
+                        child: _ChromeSizeReporter(
+                          onSize: (size) {
+                            if (mounted && size.height != _topHeight) {
+                              setState(() => _topHeight = size.height);
+                            }
+                          },
+                          child: topBar,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             if (navigation != null)
               Positioned(
                 bottom: media.padding.bottom + theme.tokens.spacing(3),
@@ -253,7 +374,7 @@ class AppScaffold extends StatelessWidget {
                               )
                             : KeyedSubtree(
                                 key: const ValueKey('navigation-visible'),
-                                child: navigation!,
+                                child: navigation,
                               ),
                       ),
                     ),
@@ -265,6 +386,45 @@ class AppScaffold extends StatelessWidget {
       ),
     );
   }
+}
+
+// Measure arbitrary top content rather than assuming a fixed toolbar height.
+class _ChromeSizeReporter extends SingleChildRenderObjectWidget {
+  const _ChromeSizeReporter({required this.onSize, required super.child});
+  final ValueChanged<Size> onSize;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderChromeSizeReporter(onSize);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderChromeSizeReporter renderObject,
+  ) => renderObject.onSize = onSize;
+}
+
+class _RenderChromeSizeReporter extends RenderProxyBox {
+  _RenderChromeSizeReporter(this.onSize);
+  ValueChanged<Size> onSize;
+  Size? _reportedSize;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    if (size == _reportedSize) return;
+    _reportedSize = size;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (attached) onSize(size);
+    });
+  }
+}
+
+// Retained destinations report their stored position when selection changes,
+// even when restoring a page does not generate a new scroll notification.
+class _AppPageScrollNotification extends Notification {
+  _AppPageScrollNotification(this.offset);
+  final double offset;
 }
 
 /// A named destination with an icon and optional status badge.
@@ -440,11 +600,30 @@ class AppNavigationBody extends StatefulWidget {
 class _AppNavigationBodyState extends State<AppNavigationBody> {
   Timer? _settle;
   bool _transitioning = false;
+  final _scrollOffsets = <int, double>{};
+
+  bool _rememberOffset(int index, ScrollMetrics metrics, int depth) {
+    if (depth == 0 && metrics.axis == Axis.vertical) {
+      _scrollOffsets[index] = metrics.pixels - metrics.minScrollExtent;
+    }
+    return false;
+  }
+
+  void _reportPageOffset() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _AppPageScrollNotification(
+          _scrollOffsets[widget.index] ?? 0,
+        ).dispatch(context);
+      }
+    });
+  }
 
   @override
   void didUpdateWidget(AppNavigationBody oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.index == widget.index) return;
+    _reportPageOffset();
     _settle?.cancel();
     final duration = context.appMotion(context.appTheme.tokens.motion.overlay);
     _transitioning = duration > Duration.zero;
@@ -481,7 +660,21 @@ class _AppNavigationBodyState extends State<AppNavigationBody> {
                   excluding: i != widget.index,
                   child: TickerMode(
                     enabled: i == widget.index,
-                    child: widget.children[i],
+                    child: NotificationListener<ScrollMetricsNotification>(
+                      onNotification: (notification) => _rememberOffset(
+                        i,
+                        notification.metrics,
+                        notification.depth,
+                      ),
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: (notification) => _rememberOffset(
+                          i,
+                          notification.metrics,
+                          notification.depth,
+                        ),
+                        child: widget.children[i],
+                      ),
+                    ),
                   ),
                 ),
               ),

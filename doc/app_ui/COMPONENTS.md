@@ -35,8 +35,12 @@ committing a transfer; cancellation must leave source data intact.
 
 AppAdaptiveLayout measures available space rather than identifying device models.
 It falls back to one pane when the requested columns cannot fit.
-AppScaffold's `reservedSpace` navigation mode advertises bottom padding through
-MediaQuery. Default lists consume it; custom list padding must preserve it.
+AppScaffold overlays top controls with a transparent-to-frosted scroll backdrop.
+It advertises their measured height and device top inset through MediaQuery;
+`reservedSpace` navigation mode also advertises bottom clearance. Default lists
+consume both; explicit list/sliver padding must preserve leading and trailing
+insets from a context inside the body. AppNavigationBody restores each retained
+page's top material; nested/horizontal scrolling does not drive the backdrop.
 
 AppNavigationBar activates destinations synchronously. A full destination cell
 is interactive, and optional haptics run without delaying selection. Preserve
