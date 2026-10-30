@@ -75,7 +75,7 @@ device screen corner radii are not inferred from safe-area values. Check the
 indicator, edge touch targets, landscape and larger labels on the actual phone.
 
 For a large page title or brandmark that becomes compact while scrolling, use
-`AppCollapsingTitle(child: expanded, collapsed: compact)` in the scroll content.
+`AppCollapsingTitle(collapsed: compact, child: expanded)` in the scroll content.
 `AppScaffold` measures the header against the actual top chrome; `AppTopBar`
 progressively reveals and scales down the compact version as it is covered.
 Scrolling back reverses the same transition. Keep the compact content

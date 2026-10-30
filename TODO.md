@@ -343,6 +343,6 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] Add an 8-point compact iOS screen-edge navigation gap through AppDimensions; keep press compression, sliding selection and trailing scroll clearance.
 - [x] Add AppCollapsingTitle measured by the nearest scaffold, with reversible compact-title motion, inactive-tab ownership and single-title semantics.
 - [x] Update the bundled Skill and integration/design/component references; skill-creator validation passes.
-- [x] Strict analysis clean; all 69 AppUI checks pass, including nested hosts, orientation, large text, cancellation, keyboard and unchanged CI goldens.
-- [ ] Upgrade BIOCAB's GitHub dependency and reinstall its matching Skill.
+- [x] Strict analysis clean; all 71 AppUI checks pass, including nested hosts, orientation, large text, cancellation, keyboard and unchanged CI goldens.
+- [x] Upgrade BIOCAB's GitHub dependency and reinstall its matching Skill (recheck after any later compatibility commit).
 - [ ] Confirm actual phone Home-indicator/edge taps and home-logo transition; do not infer physical acceptance from widget checks.

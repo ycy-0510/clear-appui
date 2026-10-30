@@ -26,6 +26,38 @@ const _items = [
 ];
 
 void main() {
+  testWidgets(
+    'custom navigation retains its declared reserve and system inset',
+    (tester) async {
+      double? inset;
+      await tester.pumpWidget(
+        _host(
+          MediaQuery(
+            data: const MediaQueryData(
+              size: Size(390, 844),
+              padding: EdgeInsets.only(bottom: 34),
+            ),
+            child: AppScaffold(
+              navigation: const SizedBox(height: 56),
+              body: Builder(
+                builder: (context) {
+                  inset = MediaQuery.paddingOf(context).bottom;
+                  return const SizedBox();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(inset, 88 + 34);
+      expect(tester.takeException(), isNull);
+    },
+    variant: TargetPlatformVariant({
+      TargetPlatform.iOS,
+      TargetPlatform.android,
+    }),
+  );
+
   for (final size in [const Size(390, 844), const Size(844, 390)]) {
     testWidgets('compact iOS gap survives rotation and large labels at $size', (
       tester,

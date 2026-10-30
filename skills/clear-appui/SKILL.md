@@ -76,8 +76,8 @@ contract is an error: use the package's bundled skill rather than guessing.
   scaffold reserves scroll clearance from the actual bar height and gap. Keep
   the capsule and its inset selection surface concentric; verify Home indicator
   clearance and edge taps on the phone rather than guessing screen corner radii.
-- Wrap a scrolling title/brandmark in AppCollapsingTitle(child: expanded,
-  collapsed: compact). The nearest AppScaffold/AppTopBar measures when it passes
+- Wrap a scrolling title/brandmark in AppCollapsingTitle(collapsed: compact,
+  child: expanded). The nearest AppScaffold/AppTopBar measures when it passes
   behind top chrome and reveals a compact copy continuously. Use original host
   artwork for both sizes. Do not add a per-page scroll threshold, opacity timer
   or replacement app bar. Retained inactive destinations must not publish a title;

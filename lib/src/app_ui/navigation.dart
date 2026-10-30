@@ -399,6 +399,7 @@ class _AppScaffoldState extends State<AppScaffold> {
     final navigation = widget.navigation;
     final keyboard = media.viewInsets.bottom > 0;
     final compactIOS =
+        navigation is AppNavigationBar &&
         defaultTargetPlatform == TargetPlatform.iOS &&
         media.size.shortestSide < 600;
     final navigationBottom = compactIOS
@@ -408,14 +409,14 @@ class _AppScaffoldState extends State<AppScaffold> {
         navigation != null &&
             !keyboard &&
             widget.navigationMode == AppNavigationMode.reservedSpace
-        ? math.max(
-            theme.dimensions.navigationExtent,
-            (navigation is AppNavigationBar
-                    ? AppNavigationBar.heightOf(context)
-                    : theme.dimensions.navigationExtent) +
-                navigationBottom +
-                theme.tokens.spacing(3),
-          )
+        ? navigation is AppNavigationBar
+              ? math.max(
+                  theme.dimensions.navigationExtent,
+                  AppNavigationBar.heightOf(context) +
+                      navigationBottom +
+                      theme.tokens.spacing(3),
+                )
+              : theme.dimensions.navigationExtent + media.padding.bottom
         : keyboard
         ? 0.0
         : media.padding.bottom;
