@@ -133,4 +133,3 @@ spacing, final-action scrolling, retry and nested Escape cancellation. A global
 hot restart completed in 6,203 ms; no console errors/warnings were captured in
 the subsequent flow. BIOCAB commit e9ac180 records the repair and screenshots.
 Physical keyboard/VoiceOver acceptance remains pending.
-
