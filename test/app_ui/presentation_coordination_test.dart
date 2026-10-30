@@ -27,6 +27,93 @@ void main() {
     ),
   );
 
+  testWidgets('nested presentations recess their parent continuously', (
+    tester,
+  ) async {
+    await boot(tester);
+    final controller = AppPresentationHost.of(page);
+    unawaited(
+      showAppSheet<void>(
+        context: page,
+        builder: (_) => AppSheet(
+          builder: (_, scroll) => ListView(
+            controller: scroll,
+            children: const [Text('Parent editor')],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    unawaited(open());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    final scales = tester
+        .widgetList<Transform>(
+          find.ancestor(
+            of: find.text('Parent editor'),
+            matching: find.byType(Transform),
+          ),
+        )
+        .map((w) => w.transform.getMaxScaleOnAxis());
+    expect(scales.any((s) => s > .965 && s < 1), isTrue);
+    await tester.pumpAndSettle();
+    controller.close();
+    await tester.pumpAndSettle();
+    expect(controller.presentationCount, 1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'fling dismissal respects host protection and asynchronous veto',
+    (tester) async {
+      await boot(tester);
+      final controller = AppPresentationHost.of(page);
+      unawaited(
+        showAppSheet<void>(
+          context: page,
+          dismissible: false,
+          builder: (_) => AppSheet(
+            initialDetent: AppSheetDetent.large,
+            builder: (_, scroll) => ListView(controller: scroll),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.fling(
+        find.byKey(const ValueKey('app-sheet-grabber')),
+        const Offset(0, 140),
+        1800,
+      );
+      await tester.pumpAndSettle();
+      expect(controller.presentationCount, 1);
+      controller.close();
+      await tester.pumpAndSettle();
+      var vetoes = 0;
+      unawaited(
+        showAppSheet<void>(
+          context: page,
+          onBeforeDismiss: () async {
+            vetoes++;
+            return false;
+          },
+          builder: (_) => AppSheet(
+            initialDetent: AppSheetDetent.large,
+            builder: (_, scroll) => ListView(controller: scroll),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.fling(
+        find.byKey(const ValueKey('app-sheet-grabber')),
+        const Offset(0, 140),
+        1800,
+      );
+      await tester.pumpAndSettle();
+      expect(vetoes, 1);
+      expect(controller.presentationCount, 1);
+    },
+  );
+
   testWidgets(
     'host count retains exiting containers and keyboard cancellation',
     (tester) async {

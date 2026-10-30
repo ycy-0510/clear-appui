@@ -1,5 +1,31 @@
 # Apple HIG reference — Sheet update
 
+## Button hierarchy and appearance — 2026-10-31
+
+Reviewed Apple's [Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)
+and [Dark Mode](https://developer.apple.com/design/human-interface-guidelines/dark-mode).
+Use a prominent accent treatment for the most likely action and less prominent
+styles for alternatives. Distinguish a coherent set by style rather than by
+making one option larger. Custom buttons need a press state. Dark appearance
+uses adaptive semantic colors and elevated surfaces; it is not a literal
+inversion of light appearance. Check at least 4.5:1 text contrast in both modes.
+HIG does not mandate a particular light-gray secondary fill in dark appearance.
+AppUI's elevated neutral secondary fill and centered large continuation style
+are product choices implementing that hierarchy, without a glass effect.
+
+Tap cancellation follows Flutter's gesture arena and device-specific slop. After
+a drag cancels a tap, neither activation nor feedback may revive on reentry.
+This is a gesture contract, independent of the chosen color or corner radius.
+
+Apple's [Sheets](https://developer.apple.com/design/human-interface-guidelines/sheets)
+guidance recommends one sheet at a time from the main interface and an internal
+Back step or a full-screen flow for longer editing. Native page-sheet stacks can
+preserve context, but this is not a reason to add a hierarchy of modal editors.
+AppUI keeps unavoidable parent layers slightly recessed, with only the top layer
+interactive/focusable. The 0.965 scale and 12-point offset are product values.
+Fast downward flings bypass intermediate detents; slow/held pulls settle and only
+dismiss after deliberate travel past the smallest height. Dismissal vetoes apply.
+
 Reviewed 2026-10-29 from Apple's official documentation:
 
 - [Sheets](https://developer.apple.com/design/human-interface-guidelines/sheets)

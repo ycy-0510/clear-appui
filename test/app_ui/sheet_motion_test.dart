@@ -41,6 +41,68 @@ void main() {
     await tester.pump();
   }
 
+  testWidgets('a downward fling dismisses directly from a high detent', (
+    tester,
+  ) async {
+    final controller = AppSheetController();
+    addTearDown(controller.dispose);
+    await boot(tester);
+    await open(tester, controller: controller);
+    await tester.pumpAndSettle();
+    await tester.fling(
+      find.byKey(const ValueKey('app-sheet-grabber')),
+      const Offset(0, 140),
+      1800,
+    );
+    expect(controller.extent, greaterThan(.3));
+    await tester.pumpAndSettle();
+    expect(find.byType(AppSheet), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a slow held pull shrinks and never dismisses while held', (
+    tester,
+  ) async {
+    final controller = AppSheetController();
+    addTearDown(controller.dispose);
+    await boot(tester);
+    await open(tester, controller: controller);
+    await tester.pumpAndSettle();
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const ValueKey('app-sheet-grabber'))),
+    );
+    await gesture.moveBy(
+      const Offset(0, 250),
+      timeStamp: const Duration(milliseconds: 400),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(AppSheet), findsOneWidget);
+    await gesture.moveBy(
+      Offset.zero,
+      timeStamp: const Duration(milliseconds: 1000),
+    );
+    await gesture.up(timeStamp: const Duration(milliseconds: 1100));
+    await tester.pumpAndSettle();
+    expect(find.byType(AppSheet), findsOneWidget);
+    expect(controller.extent, closeTo(.5, .01));
+  });
+
+  testWidgets('a body fling closes but ordinary content scrolling does not', (
+    tester,
+  ) async {
+    await boot(tester);
+    await open(tester);
+    await tester.pumpAndSettle();
+    await tester.fling(find.byType(ListView), const Offset(0, -180), 1800);
+    await tester.pumpAndSettle();
+    expect(find.byType(AppSheet), findsOneWidget);
+    tester.widget<ListView>(find.byType(ListView)).controller!.jumpTo(0);
+    await tester.pumpAndSettle();
+    await tester.fling(find.byType(ListView), const Offset(0, 160), 1800);
+    await tester.pumpAndSettle();
+    expect(find.byType(AppSheet), findsNothing);
+  });
+
   testWidgets(
     'sheet enters and reverses from its current frame; future waits for exit',
     (tester) async {

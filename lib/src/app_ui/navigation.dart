@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fossui/src/app_ui/components.dart';
 import 'package:fossui/src/app_ui/foundation.dart';
 import 'package:fossui/src/app_ui/platform.dart';
+import 'package:fossui/src/app_ui/pointer_press.dart';
 
 // Duration.zero AnimatedSize can dirty layout in the pinned SDK. Reduced motion
 // lays out the final geometry directly instead of running a zero-length ticker.
@@ -927,6 +928,12 @@ class _NavigationDestinationState extends State<_NavigationDestination> {
   bool _focused = false;
   Timer? _release;
   DateTime? _pressedAt;
+  final _pointer = AppPointerPress();
+
+  void _cancelPress() {
+    _pointer.cancel();
+    _press(false);
+  }
 
   void _press(bool value) {
     _release?.cancel();
@@ -977,11 +984,7 @@ class _NavigationDestinationState extends State<_NavigationDestination> {
             ),
           ),
           if (widget.item.badge != null)
-            PositionedDirectional(
-              top: -5,
-              end: -10,
-              child: widget.item.badge!,
-            ),
+            PositionedDirectional(top: -5, end: -10, child: widget.item.badge!),
         ],
       ),
       Flexible(
@@ -1022,18 +1025,27 @@ class _NavigationDestinationState extends State<_NavigationDestination> {
         },
         child: Listener(
           behavior: HitTestBehavior.opaque,
-          onPointerDown: (_) => _press(true),
-          onPointerMove: (event) {
-            final box = context.findRenderObject()! as RenderBox;
-            _press((Offset.zero & box.size).contains(event.localPosition));
+          onPointerDown: (event) {
+            if (_pointer.down(event, MediaQuery.gestureSettingsOf(context))) {
+              _press(true);
+            }
           },
-          onPointerUp: (_) => _finishPress(),
-          onPointerCancel: (_) => _press(false),
+          onPointerMove: (event) {
+            if (_pointer.move(event)) _press(false);
+          },
+          onPointerUp: (event) {
+            if (_pointer.up(event)) _finishPress();
+          },
+          onPointerCancel: (event) {
+            if (_pointer.cancelPointer(event)) _press(false);
+          },
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             excludeFromSemantics: true,
-            onTap: _activate,
-            onTapCancel: () => _press(false),
+            onTap: () {
+              if (!_pointer.cancelled) _activate();
+            },
+            onTapCancel: _cancelPress,
             child: AnimatedScale(
               key: ValueKey('app-navigation-press-${widget.item.label}'),
               scale: _pressed && !MediaQuery.disableAnimationsOf(context)

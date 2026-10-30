@@ -20,6 +20,13 @@ the existing `Foss*` APIs through `package:fossui/fossui.dart`.
 Read each linked constructor for its supported parameters. The product layer is
 still evolving; the table lists implemented APIs rather than every planned API.
 
+`AppButtonSize.large` provides centered, enlarged continuation labels and rounded
+ends. `AppButton.expanded` defaults to following a tight parent width, so form
+actions align; true fills a bounded loose layout and false opts into a compact
+control. Variant controls emphasis independently of size. Dark secondary fills
+adapt through the existing tokens. Pointer feedback is permanently cancelled
+after tap slop or arena loss; keyboard and accessibility activation stay separate.
+
 ## Presentation and drag ownership
 
 Place AppPresentationHost inside each presenting route, below AppTheme. Use

@@ -4,7 +4,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart' show ValueListenable, ValueNotifier;
 import 'package:flutter/gestures.dart'
-    show DragStartBehavior, kMinFlingVelocity;
+    show DragStartBehavior, VelocityTracker, kMinFlingVelocity;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fossui/fossui.dart';
@@ -46,6 +46,9 @@ class AppPresentationHostState extends State<AppPresentationHost>
 
   /// Number of currently open presentations.
   int get presentationCount => _entries.length;
+
+  /// Whether the top presentation permits gesture/barrier dismissal.
+  bool get isTopDismissible => _entries.isNotEmpty && _entries.last.dismissible;
 
   /// Read-only count of open or exiting presentations, for route coordination.
   /// Observe this host's lifecycle; the listenable is disposed with the host.
@@ -93,6 +96,23 @@ class AppPresentationHostState extends State<AppPresentationHost>
     if (_entries.isNotEmpty) _close(_entries.last, result);
   }
 
+  /// Dismisses with a downward fling, preserving the existing dismissal guard.
+  void dismiss({double velocity = 0}) {
+    if (!isTopDismissible) return;
+    final entry = _entries.last;
+    final duration = context.appMotion(context.appTheme.tokens.motion.overlay);
+    if (velocity > 0 && duration > Duration.zero) {
+      final height = context.size?.height ?? 800;
+      entry.animation.reverseDuration = Duration(
+        milliseconds: (height / velocity * 1000).round().clamp(
+          math.min(100, duration.inMilliseconds),
+          duration.inMilliseconds,
+        ),
+      );
+    }
+    _close(entry);
+  }
+
   void _attachHistory(_Presentation entry) {
     entry.history = LocalHistoryEntry(
       onRemove: () {
@@ -134,6 +154,7 @@ class AppPresentationHostState extends State<AppPresentationHost>
       );
     } finally {
       entry.checkingDismiss = false;
+      if (!allowed) entry.animation.reverseDuration = null;
     }
     if (allowed && mounted && _entries.contains(entry) && !entry.closing) {
       _beginClose(entry);
@@ -165,7 +186,11 @@ class AppPresentationHostState extends State<AppPresentationHost>
     entry.history?.remove();
     if (!entry.result.isCompleted) entry.result.complete(result);
     final focus = entry.previousFocus;
-    if (mounted && wasTop && focus?.context != null) focus!.requestFocus();
+    if (mounted && wasTop && focus?.context != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && focus?.context != null) focus!.requestFocus();
+      });
+    }
   }
 
   @override
@@ -176,6 +201,50 @@ class AppPresentationHostState extends State<AppPresentationHost>
       _drag.cancel();
       _entries.toList().reversed.forEach(_remove);
     }
+  }
+
+  Widget _layer(_Presentation entry) {
+    final index = _entries.indexOf(entry);
+    final next = index + 1 < _entries.length ? _entries[index + 1] : null;
+    final covered = next != null;
+    final child = IgnorePointer(
+      ignoring: entry.closing || (covered && !_drag.isDragging),
+      child: ExcludeSemantics(
+        excluding: entry.closing || covered,
+        child: _PresentationEntryScope(
+          animation: entry.animation,
+          child: ExcludeFocus(
+            excluding: entry.closing || covered,
+            child: FocusScope(
+              autofocus: true,
+              child: Builder(builder: entry.builder),
+            ),
+          ),
+        ),
+      ),
+    );
+    return Offstage(
+      offstage: index < _entries.length - 2,
+      child: AnimatedBuilder(
+        animation: next?.animation ?? kAlwaysDismissedAnimation,
+        child: child,
+        builder: (context, child) {
+          final amount = covered
+              ? (MediaQuery.disableAnimationsOf(context)
+                    ? 1.0
+                    : next.animation.value)
+              : 0.0;
+          return Transform.translate(
+            offset: Offset(0, -12 * amount),
+            child: Transform.scale(
+              scale: 1 - .035 * amount,
+              alignment: Alignment.bottomCenter,
+              child: child,
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -254,22 +323,7 @@ class AppPresentationHostState extends State<AppPresentationHost>
                       ),
                     Positioned.fill(
                       key: entry.key,
-                      child: IgnorePointer(
-                        ignoring: entry.closing,
-                        child: ExcludeSemantics(
-                          excluding: entry.closing,
-                          child: _PresentationEntryScope(
-                            animation: entry.animation,
-                            child: ExcludeFocus(
-                              excluding: entry.closing,
-                              child: FocusScope(
-                                autofocus: true,
-                                child: Builder(builder: entry.builder),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                      child: _layer(entry),
                     ),
                   ],
                 ],
@@ -503,8 +557,40 @@ class _AppSheetState extends State<AppSheet>
   late AppSheetController _sheet;
   late final AnimationController _animation;
   double _dismissTravel = 0;
+  double _handleTravel = 0;
   double _bodyTravel = 0;
-  bool _bodyDragging = false;
+  VelocityTracker? _bodyVelocity;
+  int? _bodyPointer;
+  double _bodyStartExtent = 1;
+  double _bodyStartOffset = 0;
+
+  void _settle(
+    List<double> sizes, {
+    required double velocity,
+    required double travel,
+    required double overshoot,
+  }) {
+    if (!_sheet.isAttached) return;
+    // A fling commits to dismissal from any height. A deliberate slow pull
+    // must pass the smallest detent before it can dismiss.
+    final fling =
+        velocity > 900 && travel > context.appTheme.dimensions.touchTarget / 2;
+    final pulledPast =
+        _sheet.extent <= sizes.first + .01 &&
+        overshoot > context.appTheme.dimensions.touchTarget;
+    if (widget.dismissible &&
+        AppPresentationHost.of(context).isTopDismissible &&
+        (fling || pulledPast)) {
+      _sheet._interrupt();
+      _sheet._controller.jumpTo(_sheet.extent);
+      AppPresentationHost.of(context).dismiss(velocity: velocity);
+    } else {
+      // Stop the framework's ballistic snap before starting the shared settle.
+      _sheet._controller.jumpTo(_sheet.extent);
+      unawaited(_snap(sizes, velocity: velocity));
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -619,6 +705,7 @@ class _AppSheetState extends State<AppSheet>
                       ? null
                       : (_) {
                           _dismissTravel = 0;
+                          _handleTravel = 0;
                           _sheet._interrupt();
                         },
                   onVerticalDragUpdate: dragging
@@ -626,9 +713,13 @@ class _AppSheetState extends State<AppSheet>
                       : (event) {
                           if (!_sheet.isAttached) return;
                           final next = _sheet.extent - event.delta.dy / height;
+                          _handleTravel += event.delta.dy;
                           _dismissTravel = math.max(
                             0,
-                            _dismissTravel + event.delta.dy,
+                            _dismissTravel +
+                                (next < sizes.first
+                                    ? (sizes.first - next) * height
+                                    : math.min(0, event.delta.dy)),
                           );
                           _sheet._controller.jumpTo(
                             next.clamp(sizes.first, sizes.last),
@@ -640,19 +731,12 @@ class _AppSheetState extends State<AppSheet>
                   onVerticalDragEnd: dragging
                       ? null
                       : (event) {
-                          if (widget.dismissible &&
-                              _sheet.extent <= sizes.first + 0.01 &&
-                              (_dismissTravel > theme.dimensions.touchTarget ||
-                                  (event.primaryVelocity ?? 0) > 700)) {
-                            AppPresentationHost.of(context).close();
-                          } else {
-                            unawaited(
-                              _snap(
-                                sizes,
-                                velocity: event.primaryVelocity ?? 0,
-                              ),
-                            );
-                          }
+                          _settle(
+                            sizes,
+                            velocity: event.primaryVelocity ?? 0,
+                            travel: _handleTravel,
+                            overshoot: _dismissTravel,
+                          );
                         },
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -765,35 +849,64 @@ class _AppSheetState extends State<AppSheet>
                 ),
                 Expanded(
                   child: Listener(
-                    onPointerDown: (_) {
+                    onPointerDown: (event) {
+                      if (_bodyPointer != null) return;
+                      _bodyPointer = event.pointer;
+                      _bodyVelocity = VelocityTracker.withKind(event.kind)
+                        ..addPosition(event.timeStamp, event.position);
+                      _bodyStartExtent = _sheet.extent;
+                      _bodyStartOffset = scroll.hasClients
+                          ? math.max(0, scroll.offset)
+                          : 0;
                       _bodyTravel = 0;
-                      _bodyDragging = true;
                     },
-                    onPointerUp: (_) => _bodyDragging = false,
-                    onPointerMove: (event) =>
-                        _bodyTravel = math.max(0, _bodyTravel + event.delta.dy),
-                    onPointerCancel: (_) => _bodyDragging = false,
+                    onPointerUp: (event) {
+                      if (event.pointer != _bodyPointer) return;
+                      _bodyVelocity?.addPosition(
+                        event.timeStamp,
+                        event.position,
+                      );
+                      final velocity =
+                          _bodyVelocity?.getVelocity().pixelsPerSecond.dy ?? 0;
+                      _bodyPointer = null;
+                      final resized =
+                          _sheet.extent < _bodyStartExtent - .001 ||
+                          (_sheet.extent <= sizes.first + .01 &&
+                              _bodyStartOffset == 0);
+                      if (resized && !dragging) {
+                        final travel = _bodyTravel - _bodyStartOffset;
+                        final overshoot =
+                            travel - (_bodyStartExtent - sizes.first) * height;
+                        scheduleMicrotask(() {
+                          if (mounted) {
+                            _settle(
+                              sizes,
+                              velocity: velocity,
+                              travel: travel,
+                              overshoot: overshoot,
+                            );
+                          }
+                        });
+                      }
+                    },
+                    onPointerMove: (event) {
+                      if (event.pointer != _bodyPointer) return;
+                      _bodyVelocity?.addPosition(
+                        event.timeStamp,
+                        event.position,
+                      );
+                      _bodyTravel = math.max(0, _bodyTravel + event.delta.dy);
+                    },
+                    onPointerCancel: (event) {
+                      if (event.pointer != _bodyPointer) return;
+                      _bodyPointer = null;
+                    },
                     child: NotificationListener<ScrollNotification>(
                       onNotification: (notification) {
                         if (notification.depth != 0) return false;
                         if (notification is ScrollStartNotification &&
                             notification.dragDetails != null) {
-                          _bodyDragging = true;
                           _sheet._interrupt();
-                        }
-                        final pullingPastTop =
-                            notification is OverscrollNotification &&
-                                notification.dragDetails != null &&
-                                notification.overscroll < 0 ||
-                            notification is ScrollUpdateNotification &&
-                                notification.dragDetails != null &&
-                                notification.metrics.pixels <
-                                    notification.metrics.minScrollExtent;
-                        if (pullingPastTop &&
-                            _sheet.extent <= sizes.first + 0.01 &&
-                            _bodyTravel > theme.dimensions.touchTarget &&
-                            widget.dismissible) {
-                          AppPresentationHost.of(context).close();
                         }
                         return false;
                       },
@@ -850,30 +963,19 @@ class _AppSheetState extends State<AppSheet>
             .._min = sizes.first
             .._max = sizes.last
             .._duration = context.appMotion(theme.tokens.motion.drawer);
-          final panel = NotificationListener<DraggableScrollableNotification>(
-            onNotification: (notification) {
-              if (_bodyDragging &&
-                  widget.dismissible &&
-                  _bodyTravel > theme.dimensions.touchTarget &&
-                  notification.extent <= sizes.first + 0.01) {
-                AppPresentationHost.of(context).close();
-              }
-              return false;
-            },
-            child: DraggableScrollableSheet(
-              controller: _sheet._controller,
-              initialChildSize: widget.initialDetent
-                  .resolve(height)
-                  .clamp(sizes.first, sizes.last),
-              minChildSize: sizes.first,
-              maxChildSize: sizes.last,
-              expand: false,
-              snap: sizes.length > 1,
-              snapSizes: sizes,
-              shouldCloseOnMinExtent: false,
-              builder: (context, scroll) =>
-                  _surface(context, scroll, sizes, height),
-            ),
+          final panel = DraggableScrollableSheet(
+            controller: _sheet._controller,
+            initialChildSize: widget.initialDetent
+                .resolve(height)
+                .clamp(sizes.first, sizes.last),
+            minChildSize: sizes.first,
+            maxChildSize: sizes.last,
+            expand: false,
+            snap: sizes.length > 1,
+            snapSizes: sizes,
+            shouldCloseOnMinExtent: false,
+            builder: (context, scroll) =>
+                _surface(context, scroll, sizes, height),
           );
           final animation = _PresentationEntryScope.maybeOf(context);
           return Align(

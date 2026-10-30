@@ -20,6 +20,10 @@
 - [ ] 系統主題切換、High Contrast、Theme interpolation 回歸驗證。
 
 ## 2. Components（原計畫 5）
+- [x] 本次：滑動超過系統 tap slop 或輸給捲動後，該次按壓永久取消；返回原位不恢復。共用於 AppButton／導航。
+- [x] 本次：AppButtonSize.large、滿寬置中標籤與圓角；深色次要按鈕由既有 tokens 導出較明顯的中性底色。
+- [x] 初步驗證：手勢取消與 Sheet 動作合計 14 項通過（自動滿寬／層級補丁之前）。
+- [ ] 依使用者 2026-10-31 要求延後：最終嚴格分析／測試／golden、Skill validator、跨容器與 BIOCAB Hot Restart 實機驗收。已修正初次分析指出的文件與格式問題，尚未重跑。
 - [x] 上游已有 Button、Text、Badge、Card、TextField、Checkbox、Radio、Switch。
 - [x] 上游已有 Chip、ListTile、Avatar、Progress、Spinner、Skeleton、Separator。
 - [x] AppButton：variants、非同步提交防重、錯誤回呼、按壓取消、鍵盤及語意。
@@ -48,6 +52,9 @@
 - [ ] 與既有 Router 整合 deep link、返回及頁面狀態保留。
 
 ## 5. Presentation 與 Overlay（原計畫 8、11）
+- [x] 本次：快速向下甩直接關閉，慢拉／停住後放開吸附高度；手指仍按住時不自動關閉。
+- [x] 本次：共用 host 的次層縮退、只保留最近一層脈絡，覆蓋層不參與鍵盤／語意焦點。
+- [ ] 本次待驗證：甩動／慢拉、禁止關閉、非同步 veto、巢狀開關動畫與鍵盤回復。
 - [x] 上游已有 Dialog、Drawer、Popover、焦點與 Escape 基礎。
 - [x] 共用 AppPresentationHost：層級、開關、結果、焦點與生命週期。
 - [x] AppSheet：多段比例／固定高度、吸附、handle、列表捲動協調。

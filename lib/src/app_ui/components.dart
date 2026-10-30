@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fossui/fossui.dart';
 import 'package:fossui/src/app_ui/foundation.dart';
 import 'package:fossui/src/app_ui/platform.dart';
+import 'package:fossui/src/app_ui/pointer_press.dart';
 
 // Keep grouped content distinct from a white canvas, using FossUI's existing
 // subtle-fill role. Resolve it once against the card so adjacent rows stay
@@ -29,6 +30,15 @@ enum AppButtonVariant {
   destructive,
 }
 
+/// Button geometry; visual emphasis is controlled separately by the variant.
+enum AppButtonSize {
+  /// Compact product default with the shared minimum touch target.
+  standard,
+
+  /// Larger, rounded action with a centered, more readable label.
+  large,
+}
+
 /// A themed button that gates asynchronous re-entry and handles press cancel.
 class AppButton extends StatefulWidget {
   /// Creates an action. A null callback disables it.
@@ -42,6 +52,8 @@ class AppButton extends StatefulWidget {
     this.onError,
     this.haptic = false,
     this.contentPadding,
+    this.size = AppButtonSize.standard,
+    this.expanded,
     super.key,
   });
 
@@ -72,6 +84,13 @@ class AppButton extends StatefulWidget {
   /// Optional content inset; the shared minimum touch target remains in force.
   final EdgeInsetsGeometry? contentPadding;
 
+  /// Shared geometry for ordinary or prominent continuation controls.
+  final AppButtonSize size;
+
+  /// Fills a bounded parent's width and centers the content. Null follows a
+  /// tight parent width, so direct form actions align automatically.
+  final bool? expanded;
+
   @override
   State<AppButton> createState() => _AppButtonState();
 }
@@ -83,6 +102,12 @@ class _AppButtonState extends State<AppButton> {
   Timer? _release;
   Timer? _loadingDelay;
   DateTime? _pressedAt;
+  final _pointer = AppPointerPress();
+
+  void _cancelPress() {
+    _pointer.cancel();
+    _press(false);
+  }
 
   Future<void> _run() async {
     if (_pending || widget.loading || widget.onPressed == null) return;
@@ -144,18 +169,38 @@ class _AppButtonState extends State<AppButton> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => _buildButton(
+      context,
+      widget.expanded ?? constraints.hasTightWidth,
+    ),
+  );
+
+  Widget _buildButton(BuildContext context, bool expanded) {
     final enabled = widget.onPressed != null && !_busy && !widget.loading;
+    final t = context.appTheme.tokens;
+    final large = widget.size == AppButtonSize.large;
+    final secondary =
+        widget.variant == AppButtonVariant.secondary && t.colors.isDark;
     return Listener(
-      onPointerDown: enabled ? (_) => _press(true) : null,
-      onPointerMove: enabled
+      onPointerDown: enabled
           ? (event) {
-              final box = context.findRenderObject()! as RenderBox;
-              _press((Offset.zero & box.size).contains(event.localPosition));
+              if (_pointer.down(event, MediaQuery.gestureSettingsOf(context))) {
+                _press(true);
+              }
             }
           : null,
-      onPointerUp: (_) => _finishPress(),
-      onPointerCancel: (_) => _press(false),
+      onPointerMove: enabled
+          ? (event) {
+              if (_pointer.move(event)) _press(false);
+            }
+          : null,
+      onPointerUp: (event) {
+        if (_pointer.up(event)) _finishPress();
+      },
+      onPointerCancel: (event) {
+        if (_pointer.cancelPointer(event)) _press(false);
+      },
       child: AnimatedScale(
         scale:
             _pressed &&
@@ -172,10 +217,37 @@ class _AppButtonState extends State<AppButton> {
         curve: _pressed ? Curves.easeOutCubic : Curves.easeOutBack,
         child: FossButton(
           style: FossButtonStyle(
-            minHeight: context.appTheme.dimensions.touchTarget,
+            minHeight:
+                context.appTheme.dimensions.touchTarget +
+                (large ? t.spacing(2) : 0),
             padding: widget.contentPadding,
+            borderRadius: large ? 999 : null,
+            textStyle: large
+                ? t.typography.lg.copyWith(fontWeight: FontWeight.w600)
+                : null,
+            // Use the existing semantic tokens, with a stronger elevated fill
+            // for dark controls. Do not lighten every grouped/card surface.
+            backgroundColor: secondary
+                ? WidgetStateProperty.resolveWith((states) {
+                    final alpha = states.contains(WidgetState.pressed)
+                        ? 0.18
+                        : states.contains(WidgetState.hovered)
+                        ? 0.14
+                        : 0.09;
+                    return Color.alphaBlend(
+                      t.colors.foreground.withValues(alpha: alpha),
+                      t.colors.popover,
+                    );
+                  })
+                : null,
           ),
           onPressed: enabled ? _run : null,
+          onPointerPressed: enabled
+              ? () {
+                  if (!_pointer.cancelled) unawaited(_run());
+                }
+              : null,
+          onTapCancel: _cancelPress,
           loading: _busy || widget.loading,
           variant: switch (widget.variant) {
             AppButtonVariant.primary => FossButtonVariant.primary,
@@ -186,7 +258,12 @@ class _AppButtonState extends State<AppButton> {
           },
           leading: widget.leading,
           semanticLabel: widget.semanticLabel,
-          child: widget.child,
+          child: expanded
+              ? SizedBox(
+                  width: double.infinity,
+                  child: Center(child: widget.child),
+                )
+              : widget.child,
         ),
       ),
     );

@@ -90,6 +90,29 @@ the current scroll geometry directly.
 
 ## Motion and continuity
 
+Tap feedback is provisional. Crossing Flutter's device-aware tap slop or losing
+the gesture arena permanently cancels a press for that pointer sequence.
+Returning to the starting point cannot revive it. The next pointer down starts
+a new candidate; keyboard and accessibility activation remain independent.
+Shared feedback tracking observes pointers without claiming the scroll arena.
+
+## Action buttons
+
+Use `AppButtonSize.large` and `expanded: true` for a full-width continuation
+action: centered 17-point semibold label, 56-point minimum height and rounded
+ends. Keep system text scaling. Avoid a decorative trailing arrow on a clearly
+named continuation action. These are product choices, not fixed HIG metrics.
+Keep related alternatives the same size and distinguish them by variant.
+
+Primary uses the host's adaptive accent and on-accent tokens. Secondary retains
+a neutral subtle fill in light appearance and a brighter elevated neutral fill
+in dark appearance. The dark fill blends existing foreground/popover tokens;
+it does not recolor cards or the canvas. Outline/ghost are lower-emphasis options,
+and destructive is reserved for destructive actions. Verify all states against
+both the page and grouped-card backgrounds.
+
+## Press motion
+
 HIG informs interaction behavior; it does not require an iOS visual clone.
 Keep FossUI's token-based surfaces, button depth and short press feedback.
 Product buttons compress to 0.95 and navigation content to 0.88 over 100ms,

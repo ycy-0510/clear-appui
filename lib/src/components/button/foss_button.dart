@@ -126,6 +126,8 @@ class FossButton extends StatefulWidget {
     this.semanticLabel,
     this.loading = false,
     this.loadingIndicator,
+    this.onTapCancel,
+    this.onPointerPressed,
     super.key,
   }) : _iconOnly = false;
 
@@ -152,6 +154,8 @@ class FossButton extends StatefulWidget {
     this.style,
     this.loading = false,
     this.loadingIndicator,
+    this.onTapCancel,
+    this.onPointerPressed,
     super.key,
   }) : child = icon,
        leading = null,
@@ -191,6 +195,14 @@ class FossButton extends StatefulWidget {
 
   /// Replaces the built-in spinner shown while [loading].
   final Widget? loadingIndicator;
+
+  /// Called when a pending pointer tap loses to scrolling or is cancelled.
+  /// Keyboard and accessibility activation do not use this callback.
+  final VoidCallback? onTapCancel;
+
+  /// Optional pointer-only activation override. Defaults to [onPressed].
+  /// Keyboard and accessibility activation always use [onPressed].
+  final VoidCallback? onPointerPressed;
 
   final bool _iconOnly;
 
@@ -259,6 +271,7 @@ class _FossButtonState extends State<FossButton> {
       button: true,
       enabled: widget.enabled,
       label: widget.semanticLabel,
+      onTap: widget.enabled ? widget.onPressed : null,
       child: FocusableActionDetector(
         enabled: widget.enabled,
         mouseCursor: widget.enabled
@@ -276,6 +289,7 @@ class _FossButtonState extends State<FossButton> {
         },
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
+          excludeFromSemantics: true,
           onTapDown: widget.enabled
               ? (_) => _states.update(WidgetState.pressed, true)
               : null,
@@ -283,9 +297,14 @@ class _FossButtonState extends State<FossButton> {
               ? (_) => _states.update(WidgetState.pressed, false)
               : null,
           onTapCancel: widget.enabled
-              ? () => _states.update(WidgetState.pressed, false)
+              ? () {
+                  _states.update(WidgetState.pressed, false);
+                  widget.onTapCancel?.call();
+                }
               : null,
-          onTap: widget.enabled ? widget.onPressed : null,
+          onTap: widget.enabled
+              ? widget.onPointerPressed ?? widget.onPressed
+              : null,
           child: ConstrainedBox(
             constraints: const BoxConstraints(
               minWidth: _minTapTarget,

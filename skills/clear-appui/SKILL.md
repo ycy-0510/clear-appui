@@ -96,6 +96,23 @@ contract is an error: use the package's bundled skill rather than guessing.
   navigation content to 0.88 with a short return spring. The navigation surface
   itself keeps sliding independently. Do not remove press feedback while styling
   selected backgrounds; preserve cancellation and Reduce Motion.
+  Once a pointer exceeds Flutter's device-aware tap slop or loses the gesture
+  arena to scrolling, cancel its press feedback for the rest of that pointer
+  sequence. Returning to the original position must never restore compression
+  or activation. Let the framework arbitrate taps and drags; do not infer a
+  new tap from a pointer reentering a control. Verify drag-out/return/release,
+  scroll-parent competition, pointer cancellation and the next valid tap.
+- For a large continuation action, use AppButton(size: AppButtonSize.large,
+  expanded: true, child: Text(label)). It supplies a centered, larger label and
+  rounded geometry. Use a concise label without a decorative trailing arrow.
+  AppButton also centers and fills a tight parent width by default, keeping
+  direct form actions aligned; pass expanded: false for an intentional compact
+  control, or expanded: true inside a bounded loose layout.
+  Keep adjacent alternative actions the same size. Use variants for hierarchy:
+  primary uses the host accent, secondary a neutral adaptive fill, outline and
+  ghost lower emphasis, destructive only for destructive actions. Dark secondary
+  controls use an elevated neutral fill derived from existing theme tokens;
+  do not substitute a dark primary color or brighten the entire canvas.
 - Use AppListGroup for small groups and AppSliverListGroup for long ones, with
   AppListTile rows. Only the outer group edges are rounded; inner rows share
   the surface with dividers and no per-row corner cutouts. Interactive trailing
@@ -125,6 +142,14 @@ contract is an error: use the package's bundled skill rather than guessing.
   Verify the first continuous pull from full height through translucent detents.
   Read the implementation
   before adding nested presentations or drag behaviors.
+  Prefer one sheet for a scoped task. Use an internal step with Back, or close
+  the first sheet before opening another; do not build a three/four-sheet editing
+  chain. The shared host preserves a restrained, animated parent layer for
+  unavoidable nested presentations, isolates focus/input to the top layer and
+  hides deeper visual layers. This fallback does not justify adding more steps.
+  A fast downward fling dismisses directly; a slow/held pull settles to a detent.
+  Do not close a sheet while the user is still holding it at a smaller height.
+  Preserve onBeforeDismiss, non-dismissible sheets and cross-container drags.
 - Prefer AppAdaptiveLayout, AppAdaptiveGrid and AppConstrainedContent for
   constrained layouts. Base adaptation on available space.
 - Use AppFormBody for short scrollable sheet forms, passing the sheet's supplied
@@ -136,6 +161,12 @@ contract is an error: use the package's bundled skill rather than guessing.
   these form layouts. Check field-to-action and action-to-action spacing in
   normal, error and large-text states; control padding alone does not separate
   siblings.
+- Distinguish a form from an operation surface. Forms align labels, fields and
+  full-width primary actions in reading order. Reader/editor tools belong in
+  AppTopBar or a concise contextual toolbar, with infrequent actions in a menu.
+  Avoid stacks of differently sized navigation buttons and long per-row button
+  clusters. Keep progress/error feedback near the triggering action or in a
+  persistent visible status area; never require scrolling to the page top.
 - Keep feedback purposeful. FossToaster owns toast queues: only the front shows
   content; rear surfaces are previews of queued messages. Use an inline error
   when the user needs to resolve a form problem.
