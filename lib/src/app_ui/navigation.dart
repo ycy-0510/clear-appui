@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -121,17 +122,71 @@ class AppTopBar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => Padding(
+  Widget build(BuildContext context) {
+    final scaffold = context.findAncestorStateOfType<_AppScaffoldState>();
+    if (scaffold == null) return _build(context, null);
+    return ValueListenableBuilder<_CollapsedTitle?>(
+      valueListenable: scaffold._collapsedTitle,
+      builder: (context, title, _) => _build(context, title),
+    );
+  }
+
+  Widget _build(BuildContext context, _CollapsedTitle? title) => Padding(
     padding: EdgeInsets.symmetric(
       horizontal: context.appTheme.tokens.spacing(4),
       vertical: context.appTheme.tokens.spacing(2),
     ),
     child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         if (leading case final action?)
           _group(context, const ValueKey('app-top-leading'), [action]),
-        if (actions.isNotEmpty)
+        if (title != null)
           Expanded(
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: leading == null ? 0 : context.appTheme.tokens.spacing(3),
+                end: context.appTheme.tokens.spacing(3),
+              ),
+              child: SizedBox(
+                height: context.appTheme.dimensions.touchTarget,
+                child: ClipRect(
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(end: title.amount),
+                    duration: context.appMotion(context.appTheme.motion.press),
+                    builder: (context, amount, child) => IgnorePointer(
+                      child: ExcludeFocus(
+                        child: ExcludeSemantics(
+                          excluding: title.amount < .5,
+                          child: Opacity(
+                            key: const ValueKey('app-collapsed-title'),
+                            opacity: amount,
+                            alwaysIncludeSemantics: true,
+                            child: Transform.scale(
+                              scale: 1.15 - .15 * amount,
+                              alignment: AlignmentDirectional.centerStart,
+                              child: child,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: title.child,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        if (actions.isNotEmpty)
+          Flexible(
+            fit: title == null ? FlexFit.tight : FlexFit.loose,
             child: Padding(
               padding: EdgeInsetsDirectional.only(
                 start: context.appTheme.tokens.spacing(3),
@@ -146,11 +201,87 @@ class AppTopBar extends StatelessWidget {
               ),
             ),
           )
-        else
+        else if (title == null)
           const Spacer(),
       ],
     ),
   );
+}
+
+/// A scrolling title or brandmark that gains a compact copy in [AppTopBar]
+/// as its expanded content passes behind the measured top chrome.
+///
+/// Keep both widgets noninteractive. The nearest [AppScaffold] owns geometry,
+/// motion and semantics; retained, inactive navigation pages do not contribute.
+class AppCollapsingTitle extends StatefulWidget {
+  /// Creates the expanded content and its compact navigation representation.
+  const AppCollapsingTitle({
+    required this.child,
+    required this.collapsed,
+    super.key,
+  });
+
+  /// Original title in the page's scroll content.
+  final Widget child;
+
+  /// Compact title or artwork for the top bar, without another surface/inset.
+  final Widget collapsed;
+
+  @override
+  State<AppCollapsingTitle> createState() => _AppCollapsingTitleState();
+}
+
+class _AppCollapsingTitleState extends State<AppCollapsingTitle> {
+  _AppScaffoldState? _host;
+  bool _active = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final host = context.findAncestorStateOfType<_AppScaffoldState>();
+    if (_host != host) {
+      _host?._titles.remove(this);
+      _host?._scheduleTitleUpdate();
+      _host = host;
+      host?._titles.add(this);
+    }
+    _active = TickerMode.valuesOf(context).enabled;
+    host?._scheduleTitleUpdate();
+  }
+
+  @override
+  void didUpdateWidget(AppCollapsingTitle oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _host?._scheduleTitleUpdate();
+  }
+
+  @override
+  void dispose() {
+    _host?._titles.remove(this);
+    _host?._scheduleTitleUpdate();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final host = _host;
+    if (host == null) return widget.child;
+    return ValueListenableBuilder<_CollapsedTitle?>(
+      valueListenable: host._collapsedTitle,
+      child: widget.child,
+      builder: (context, title, child) => ExcludeSemantics(
+        excluding: identical(title?.source, this) && title!.amount >= .5,
+        child: child,
+      ),
+    );
+  }
+}
+
+class _CollapsedTitle {
+  const _CollapsedTitle(this.source, this.child, this.amount);
+  final _AppCollapsingTitleState? source;
+  final Widget child;
+  final double amount;
 }
 
 /// Shared page chrome, safe areas, keyboard handling and floating navigation.
@@ -182,10 +313,49 @@ class AppScaffold extends StatefulWidget {
 
 class _AppScaffoldState extends State<AppScaffold> {
   final _scrollOffset = ValueNotifier<double>(0);
+  final _collapsedTitle = ValueNotifier<_CollapsedTitle?>(null);
+  final _titles = <_AppCollapsingTitleState>{};
+  bool _titleUpdateScheduled = false;
   double _topHeight = 0;
+
+  void _scheduleTitleUpdate() {
+    if (!mounted || _titleUpdateScheduled) return;
+    _titleUpdateScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _titleUpdateScheduled = false;
+      if (!mounted) return;
+      final host = context.findRenderObject();
+      if (host is! RenderBox || !host.hasSize) return;
+      final edge = MediaQuery.paddingOf(context).top + _topHeight;
+      final active = _titles.where((title) => title.mounted && title._active);
+      final title = active.firstOrNull;
+      final previous = _collapsedTitle.value;
+      if (title == null || widget.topBar == null) {
+        if (previous != null && previous.amount != 0) {
+          _collapsedTitle.value = _CollapsedTitle(null, previous.child, 0);
+        }
+        return;
+      }
+      final box = title.context.findRenderObject();
+      if (box is! RenderBox || !box.hasSize || box.size.height <= 0) return;
+      final top = box.localToGlobal(Offset.zero, ancestor: host).dy;
+      final amount = ((edge - top) / box.size.height).clamp(0.0, 1.0);
+      if (previous?.source != title ||
+          previous?.child != title.widget.collapsed ||
+          previous?.amount != amount) {
+        _collapsedTitle.value = _CollapsedTitle(
+          title,
+          title.widget.collapsed,
+          amount,
+        );
+      }
+    });
+    WidgetsBinding.instance.ensureVisualUpdate();
+  }
 
   void _setScrollOffset(double offset) {
     _scrollOffset.value = math.max(0, offset);
+    _scheduleTitleUpdate();
   }
 
   bool _observeScroll(ScrollNotification notification) {
@@ -218,6 +388,7 @@ class _AppScaffoldState extends State<AppScaffold> {
   @override
   void dispose() {
     _scrollOffset.dispose();
+    _collapsedTitle.dispose();
     super.dispose();
   }
 
@@ -227,18 +398,24 @@ class _AppScaffoldState extends State<AppScaffold> {
     final media = MediaQuery.of(context);
     final navigation = widget.navigation;
     final keyboard = media.viewInsets.bottom > 0;
+    final compactIOS =
+        defaultTargetPlatform == TargetPlatform.iOS &&
+        media.size.shortestSide < 600;
+    final navigationBottom = compactIOS
+        ? theme.dimensions.compactNavigationBottomMargin
+        : media.padding.bottom + theme.tokens.spacing(3);
     final bottom =
         navigation != null &&
             !keyboard &&
             widget.navigationMode == AppNavigationMode.reservedSpace
         ? math.max(
-                theme.dimensions.navigationExtent,
-                navigation is AppNavigationBar
-                    ? AppNavigationBar.heightOf(context) +
-                          theme.tokens.spacing(6)
-                    : 0.0,
-              ) +
-              media.padding.bottom
+            theme.dimensions.navigationExtent,
+            (navigation is AppNavigationBar
+                    ? AppNavigationBar.heightOf(context)
+                    : theme.dimensions.navigationExtent) +
+                navigationBottom +
+                theme.tokens.spacing(3),
+          )
         : keyboard
         ? 0.0
         : media.padding.bottom;
@@ -332,6 +509,7 @@ class _AppScaffoldState extends State<AppScaffold> {
                           onSize: (size) {
                             if (mounted && size.height != _topHeight) {
                               setState(() => _topHeight = size.height);
+                              _scheduleTitleUpdate();
                             }
                           },
                           child: topBar,
@@ -343,7 +521,7 @@ class _AppScaffoldState extends State<AppScaffold> {
               ),
             if (navigation != null)
               Positioned(
-                bottom: media.padding.bottom + theme.tokens.spacing(3),
+                bottom: navigationBottom,
                 left: theme.tokens.spacing(4),
                 right: theme.tokens.spacing(4),
                 child: IgnorePointer(

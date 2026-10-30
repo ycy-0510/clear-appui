@@ -71,6 +71,17 @@ contract is an error: use the package's bundled skill rather than guessing.
   use bottom SafeArea to cut off scrolling content. Put scrolling headers,
   search/filter controls and lazy results in one CustomScrollView when the
   original page scrolls as a unit; use SliverToBoxAdapter and AppSliverListGroup.
+  Compact iOS navigation sits near the physical bottom edge with the theme's
+  8-point default margin; do not add another bottom SafeArea around it. The
+  scaffold reserves scroll clearance from the actual bar height and gap. Keep
+  the capsule and its inset selection surface concentric; verify Home indicator
+  clearance and edge taps on the phone rather than guessing screen corner radii.
+- Wrap a scrolling title/brandmark in AppCollapsingTitle(child: expanded,
+  collapsed: compact). The nearest AppScaffold/AppTopBar measures when it passes
+  behind top chrome and reveals a compact copy continuously. Use original host
+  artwork for both sizes. Do not add a per-page scroll threshold, opacity timer
+  or replacement app bar. Retained inactive destinations must not publish a title;
+  verify scrolling back, tab changes, large text and Reduce Motion.
 - Use AppNavigationBody to retain destination state during a crossfade. The
   bar has one persistent sliding selection surface. Destinations retain brief
   press-scale feedback for quick taps and keyboard activation without painting a

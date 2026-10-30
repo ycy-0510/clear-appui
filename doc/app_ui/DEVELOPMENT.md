@@ -119,6 +119,13 @@ computed bar height plus spacing. Its `navigationExtent` token is a minimum
 reserve for other navigation implementations. Tab content in the course demo
 stays mounted, preserving input when switching destinations.
 
+Compact iOS chrome uses `AppDimensions.compactNavigationBottomMargin` (8 by
+default), measured from the screen edge rather than adding bottom safe padding.
+Reserved scroll space uses the bar height, its gap and trailing content clearance.
+Use `AppCollapsingTitle` inside scrolling content to supply an expanded title and
+its compact `AppTopBar` representation. The scaffold measures occlusion; apps do
+not duplicate scroll thresholds or per-screen title animations.
+
 AppThemeData.light/dark are cached product presets derived from FossThemeData
 with the token engine. They use grouped surfaces, a blue action color and the
 shared radius scale. The presets are final values; pass them to an ordinary

@@ -83,6 +83,7 @@ class AppDimensions {
     this.contentWidth = 1200,
     this.minColumnWidth = 280,
     this.navigationExtent = 88,
+    this.compactNavigationBottomMargin = 8,
   });
 
   /// Smallest interactive target.
@@ -96,6 +97,10 @@ class AppDimensions {
 
   /// Space reserved at the bottom for floating navigation.
   final double navigationExtent;
+
+  /// Screen-edge gap for floating navigation on compact iOS layouts.
+  /// The capsule does not add the home-indicator inset a second time.
+  final double compactNavigationBottomMargin;
 }
 
 // Product density is adapted through FossTheme's existing token engine.

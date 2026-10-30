@@ -335,3 +335,14 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] BIOCAB 升級 Git b5a4639 及 matching Skill；嚴格分析與 114 項回歸通過，新增實際表單間距檢查。
 - [x] BIOCAB Preview 390×520 實際確認正常／錯誤間距、最後按鈕捲動、重試及巢狀 Escape 取消；hot restart 6,203ms，後續操作無 captured console error/warning。消費端修正 commit e9ac180。
 - [ ] 實機表單／鍵盤／VoiceOver 驗收；依使用者授權，必要時單次安裝 Debug，再以 hot reload 迭代。
+
+
+## Compact iOS chrome and collapsing titles — 2026-10-30
+
+- [x] Preserve upstream FossUI APIs, licenses and tests; product chrome stays in `lib/src/app_ui/`.
+- [x] Add an 8-point compact iOS screen-edge navigation gap through AppDimensions; keep press compression, sliding selection and trailing scroll clearance.
+- [x] Add AppCollapsingTitle measured by the nearest scaffold, with reversible compact-title motion, inactive-tab ownership and single-title semantics.
+- [x] Update the bundled Skill and integration/design/component references; skill-creator validation passes.
+- [x] Strict analysis clean; all 69 AppUI checks pass, including nested hosts, orientation, large text, cancellation, keyboard and unchanged CI goldens.
+- [ ] Upgrade BIOCAB's GitHub dependency and reinstall its matching Skill.
+- [ ] Confirm actual phone Home-indicator/edge taps and home-logo transition; do not infer physical acceptance from widget checks.

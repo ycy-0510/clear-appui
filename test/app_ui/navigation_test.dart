@@ -26,6 +26,107 @@ const _items = [
 ];
 
 void main() {
+  for (final size in [const Size(390, 844), const Size(844, 390)]) {
+    testWidgets('compact iOS gap survives rotation and large labels at $size', (
+      tester,
+    ) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        _host(
+          MediaQuery(
+            data: MediaQueryData(
+              size: size,
+              padding: const EdgeInsets.only(bottom: 34),
+              textScaler: const TextScaler.linear(2),
+            ),
+            child: AppScaffold(
+              body: const SizedBox(),
+              navigation: AppNavigationBar(
+                items: _items,
+                selectedIndex: 0,
+                haptic: false,
+                onSelected: (_) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        size.height - tester.getRect(find.byType(AppNavigationBar)).bottom,
+        8,
+      );
+      expect(
+        tester.getRect(find.text('Components')).bottom,
+        lessThan(size.height - 16),
+      );
+      expect(tester.takeException(), isNull);
+    }, variant: TargetPlatformVariant({TargetPlatform.iOS}));
+  }
+
+  testWidgets(
+    'compact iOS capsule uses the screen-edge gap and reserves '
+    'reachable scroll content',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      var calls = 0;
+      await tester.pumpWidget(
+        _host(
+          MediaQuery(
+            data: const MediaQueryData(
+              size: Size(390, 844),
+              padding: EdgeInsets.only(top: 47, bottom: 34),
+            ),
+            child: AppScaffold(
+              navigation: AppNavigationBar(
+                items: _items,
+                selectedIndex: 0,
+                haptic: false,
+                onSelected: (_) => calls++,
+              ),
+              body: Builder(
+                builder: (context) => ListView(
+                  padding: MediaQuery.paddingOf(context),
+                  children: [
+                    const SizedBox(height: 1500),
+                    AppButton(
+                      onPressed: () {},
+                      child: const Text('Final action'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final capsule = tester.getRect(find.byType(AppNavigationBar));
+      expect(844 - capsule.bottom, 8);
+      final destination = find.byKey(
+        const ValueKey('app-navigation-press-Components'),
+      );
+      expect(tester.getRect(destination).height, greaterThanOrEqualTo(48));
+      await tester.tap(destination);
+      await tester.pumpAndSettle();
+      expect(calls, 1);
+      await tester.drag(find.byType(ListView), const Offset(0, -1800));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getRect(find.text('Final action')).bottom,
+        lessThan(capsule.top),
+      );
+      expect(tester.takeException(), isNull);
+    },
+    variant: TargetPlatformVariant({TargetPlatform.iOS}),
+  );
+
   testWidgets(
     'quick navigation tap shrinks while one selection surface slides',
     (tester) async {

@@ -105,3 +105,18 @@ The 48-point transition distance, 12-point blur and tint opacity are product
 implementation choices in the shared component, not Apple-prescribed metrics.
 See [Scroll views](https://developer.apple.com/design/human-interface-guidelines/scroll-views)
 for scroll-edge context and content visibility guidance.
+
+## Compact navigation and scroll titles
+
+Compact iOS navigation now uses an 8-point screen-edge gap rather than adding
+the full bottom safe inset. This is a Clear AppUI product choice, not an Apple
+prescribed value. Keep the selection surface concentric with the capsule and
+verify Home indicator/gesture clearance on a real phone. Trailing scroll content
+still clears the actual floating bar; the viewport is not cropped by a SafeArea.
+
+`AppCollapsingTitle` follows the title's measured occlusion under top chrome.
+The compact version appears and shrinks continuously, reverses when returning
+to the top and excludes duplicate semantics. Inactive retained destinations and
+nested scaffolds have separate title ownership. Reduce Motion retains the
+current scroll position without an extra timed transition. Use this for a
+host-provided logo as well as a textual title; do not recolor the source artwork.

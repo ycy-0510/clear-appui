@@ -8,6 +8,7 @@ the existing `Foss*` APIs through `package:fossui/fossui.dart`.
 | Area | APIs | Implementation |
 | --- | --- | --- |
 | Theme | AppTheme, AppThemeData, AppDimensions, AppMotion, AppSheetStyle | [foundation.dart](../../lib/src/app_ui/foundation.dart) |
+| Collapsing title | AppCollapsingTitle with AppScaffold/AppTopBar | [navigation.dart](../../lib/src/app_ui/navigation.dart) |
 | Controls | AppButton, AppText, AppIcon, AppCard, AppBadge, AppTextField, AppCheckbox, AppSwitch, AppListTile, AppListGroup, AppSliverListGroup, AppEmptyState | [components.dart](../../lib/src/app_ui/components.dart) |
 | Layout | AppLayoutEnvironment, AppAdaptiveLayout, AppConstrainedContent, AppAdaptiveGrid, AppFormLayout, AppFormBody | [layout.dart](../../lib/src/app_ui/layout.dart) |
 | Navigation | AppScaffold, AppTopBar, AppTopBarAction, AppNavigationBar, AppNavigationItem, AppNavigationBody | [navigation.dart](../../lib/src/app_ui/navigation.dart) |

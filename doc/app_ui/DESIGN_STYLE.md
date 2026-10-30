@@ -64,6 +64,26 @@ AppTopBar(
 Use the existing `AppNavigationBar` for floating bottom destinations. Top action
 groups and bottom destinations serve different purposes.
 
+On compact iOS windows the navigation capsule sits 8 logical pixels above the
+physical bottom edge, configurable through
+`AppDimensions.compactNavigationBottomMargin`. Do not add the home-indicator inset
+on top of this gap. Other platforms retain their safe-inset placement. The
+scaffold's trailing scroll padding follows the bar's height and position so the
+last row still scrolls above it. The outer stadium and the selection stadium
+retain their shared center and 6-point inset. This is a product geometry choice;
+device screen corner radii are not inferred from safe-area values. Check the
+indicator, edge touch targets, landscape and larger labels on the actual phone.
+
+For a large page title or brandmark that becomes compact while scrolling, use
+`AppCollapsingTitle(child: expanded, collapsed: compact)` in the scroll content.
+`AppScaffold` measures the header against the actual top chrome; `AppTopBar`
+progressively reveals and scales down the compact version as it is covered.
+Scrolling back reverses the same transition. Keep the compact content
+noninteractive and omit another capsule/background. Original artwork remains
+the host's responsibility. Semantics move between the two representations, and
+inactive retained destinations do not contribute a title. Reduce Motion uses
+the current scroll geometry directly.
+
 ## Motion and continuity
 
 HIG informs interaction behavior; it does not require an iOS visual clone.
