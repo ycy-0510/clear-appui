@@ -332,4 +332,6 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] 新增共用 AppFormLayout／AppFormBody，統一欄位、錯誤及操作的間距與外側對齊，保留群組內部連續列。
 - [x] 更新設計指南及 portable Skill，避免把欄位內距當成表單間距或重複加鍵盤 inset。
 - [x] 62 項 AppUI 測試及嚴格分析通過，包含正常／錯誤間距、放大字體、鍵盤捲動及 Escape 取消；既有 Golden 未變更。
-- [ ] 驗證共用版面及消費端所有適用表單，更新消費端 package／Skill 並完成 Preview。
+- [x] BIOCAB 升級 Git b5a4639 及 matching Skill；嚴格分析與 114 項回歸通過，新增實際表單間距檢查。
+- [x] BIOCAB Preview 390×520 實際確認正常／錯誤間距、最後按鈕捲動、重試及巢狀 Escape 取消；hot restart 6,203ms，後續操作無 captured console error/warning。消費端修正 commit e9ac180。
+- [ ] 實機表單／鍵盤／VoiceOver 驗收；依使用者授權，必要時單次安裝 Debug，再以 hot reload 迭代。

@@ -118,3 +118,19 @@ AppUI 26 項（24 互動／行為＋2 CI Golden）通過；新控制群組驗證
 pointer cancel 與鍵盤啟動，兩張產品視覺基準經檢視後更新並重跑。
 Skill 已同步 DESIGN_STYLE 指南及 doctor 來源。此輪未重跑完整上游元件庫，
 不把產品配置驗證延伸成所有元件狀態的視覺驗收。
+## Form sibling spacing — 2026-10-30
+
+AppFormBody and AppFormLayout use existing spacing tokens to separate fields,
+messages and actions. They leave grouped rows contiguous and stretch short-form
+controls to one alignment. The scroll body consumes bottom safe padding; the
+sheet retains keyboard resizing and the supplied drag/scroll controller.
+
+Strict analysis and 62 AppUI tests pass, including normal/error geometry,
+large text, keyboard scrolling and Escape. Existing visual baselines are
+unchanged. BIOCAB pins Git b5a4639 with matching Skill; all 114 consumer tests
+and strict analysis pass. Actual 390x520 Preview checks confirm normal/error
+spacing, final-action scrolling, retry and nested Escape cancellation. A global
+hot restart completed in 6,203 ms; no console errors/warnings were captured in
+the subsequent flow. BIOCAB commit e9ac180 records the repair and screenshots.
+Physical keyboard/VoiceOver acceptance remains pending.
+
