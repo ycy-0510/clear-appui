@@ -111,6 +111,15 @@ contract is an error: use the package's bundled skill rather than guessing.
   before adding nested presentations or drag behaviors.
 - Prefer AppAdaptiveLayout, AppAdaptiveGrid and AppConstrainedContent for
   constrained layouts. Base adaptation on available space.
+- Use AppFormBody for short scrollable sheet forms, passing the sheet's supplied
+  controller. It owns 16-point content insets, sibling gaps and bottom safe
+  clearance; the sheet already handles keyboard resizing. Use AppFormLayout in
+  an existing padded/sliver container. Fields, error messages and action buttons
+  are separate children; keep an AppListGroup as one child so its rows stay
+  contiguous. Do not add manual SizedBox gaps or another keyboard inset inside
+  these form layouts. Check field-to-action and action-to-action spacing in
+  normal, error and large-text states; control padding alone does not separate
+  siblings.
 - Keep feedback purposeful. FossToaster owns toast queues: only the front shows
   content; rear surfaces are previews of queued messages. Use an inline error
   when the user needs to resolve a form problem.

@@ -325,3 +325,11 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 
 - [x] 依使用者最新要求，將 CPU 啟動門檻改為 50%；同步本專案與 BIOCAB 的檢查腳本及開發指引。
 - [ ] 長時間編譯期間仍須留意負載；不可僅以啟動時低於門檻推定全程符合。
+
+## 表單元件之間的間距（2026-10-30）
+
+- [x] 根因：個別控制項的內距不會替 ListView 兄弟元件加入間距；消費端手動 spacer 有漏項。
+- [x] 新增共用 AppFormLayout／AppFormBody，統一欄位、錯誤及操作的間距與外側對齊，保留群組內部連續列。
+- [x] 更新設計指南及 portable Skill，避免把欄位內距當成表單間距或重複加鍵盤 inset。
+- [x] 62 項 AppUI 測試及嚴格分析通過，包含正常／錯誤間距、放大字體、鍵盤捲動及 Escape 取消；既有 Golden 未變更。
+- [ ] 驗證共用版面及消費端所有適用表單，更新消費端 package／Skill 並完成 Preview。

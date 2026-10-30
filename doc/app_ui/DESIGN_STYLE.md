@@ -138,6 +138,16 @@ forms on the same outer alignment and consume AppScaffold's bottom padding so
 floating navigation cannot cover the last control. Keep action targets at the
 shared 48-point minimum even when icon and text sizes are compact.
 
+Short sheet forms use `AppFormBody(controller: scroll, children: [...])` for
+16-point outer insets and sibling gaps. Fields, errors and action buttons are
+separate children; an entire `AppListGroup` stays one child so internal rows
+remain contiguous. `AppFormLayout` provides the same gaps inside an existing
+padded/sliver container. Remove manual spacer children when adopting either.
+Controls do not carry implicit outer margins. Verify field-to-action and
+action-to-action gaps as well as internal padding. The sheet owns keyboard
+resizing; form bodies consume bottom safe padding without adding the keyboard
+height a second time.
+
 These are configurable product decisions, not Apple-prescribed typography or
 padding values. [HIG notes](APPLE_HIG_NOTES.md) separate guidance from choices.
 

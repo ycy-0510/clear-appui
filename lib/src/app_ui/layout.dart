@@ -1,6 +1,74 @@
 import 'package:flutter/widgets.dart';
 import 'package:fossui/src/app_ui/foundation.dart';
 
+/// A short form with consistent gaps between fields, messages and actions.
+///
+/// Put grouped rows inside one child; their internal dividers remain
+/// contiguous.
+/// Do not add spacer widgets between children of this layout.
+class AppFormLayout extends StatelessWidget {
+  /// Creates a form that stretches controls to one shared alignment.
+  const AppFormLayout({required this.children, this.spacing, super.key});
+
+  /// Fields, groups, messages or actions in their reading order.
+  final List<Widget> children;
+
+  /// Optional gap override; defaults to the shared 16-point token.
+  final double? spacing;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    spacing: spacing ?? context.appTheme.tokens.spacing(4),
+    children: children,
+  );
+}
+
+/// A scrollable short form with shared content insets and sibling spacing.
+///
+/// In a sheet, pass its supplied controller. The sheet/scaffold handles keyboard
+/// resizing; this body consumes bottom safe padding without adding it twice.
+class AppFormBody extends StatelessWidget {
+  /// Creates an inset form body without per-field outer margins.
+  const AppFormBody({
+    required this.children,
+    this.controller,
+    this.padding,
+    this.spacing,
+    super.key,
+  });
+
+  /// Fields, groups, messages or actions in their reading order.
+  final List<Widget> children;
+
+  /// The presentation host's scroll controller, when used inside a sheet.
+  final ScrollController? controller;
+
+  /// Optional content inset override; defaults to 16 plus bottom safe padding.
+  final EdgeInsetsGeometry? padding;
+
+  /// Optional sibling gap override; defaults to the shared 16-point token.
+  final double? spacing;
+
+  @override
+  Widget build(BuildContext context) {
+    final inset = context.appTheme.tokens.spacing(4);
+    return ListView(
+      controller: controller,
+      padding:
+          padding ??
+          EdgeInsets.fromLTRB(
+            inset,
+            inset,
+            inset,
+            inset + MediaQuery.paddingOf(context).bottom,
+          ),
+      children: [AppFormLayout(spacing: spacing, children: children)],
+    );
+  }
+}
+
 /// Width categories determined by available logical pixels.
 enum AppSizeClass {
   /// Below 600 logical pixels.
