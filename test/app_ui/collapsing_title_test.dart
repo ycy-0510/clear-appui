@@ -179,7 +179,7 @@ void main() {
       expect(amount(tester), 1);
       select(() => index = 1);
       await tester.pumpAndSettle();
-      expect(amount(tester), 0);
+      expect(find.byKey(const ValueKey('app-collapsed-title')), findsNothing);
       select(() => index = 0);
       await tester.pumpAndSettle();
       expect(scroll.offset, 200);
@@ -187,6 +187,93 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final direction in TextDirection.values) {
+    testWidgets('four top actions fit beside the compact title in $direction', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(402, 874);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final scroll = ScrollController();
+      addTearDown(scroll.dispose);
+      final tapped = <int>[];
+      await tester.pumpWidget(
+        host(
+          Directionality(
+            textDirection: direction,
+            child: AppScaffold(
+              topBar: AppTopBar(
+                actions: [
+                  for (var i = 0; i < 4; i++)
+                    AppTopBarAction(
+                      icon: SizedBox.square(
+                        key: ValueKey('toolbar-icon-$i'),
+                        dimension: 20,
+                      ),
+                      label: 'Action $i',
+                      onPressed: () => tapped.add(i),
+                    ),
+                ],
+              ),
+              body: page(scroll),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      for (final offset in [0.0, 200.0]) {
+        scroll.jumpTo(offset);
+        await tester.pumpAndSettle();
+        final surface = tester.getRect(
+          find.byKey(const ValueKey('app-top-trailing')),
+        );
+        for (var i = 0; i < 4; i++) {
+          final icon = tester.getRect(find.byKey(ValueKey('toolbar-icon-$i')));
+          expect(surface.contains(icon.topLeft), isTrue);
+          expect(surface.contains(icon.bottomRight), isTrue);
+        }
+      }
+      for (var i = 0; i < 4; i++) {
+        await tester.tap(find.byKey(ValueKey('app-top-action-Action $i')));
+        await tester.pumpAndSettle();
+      }
+      expect(tapped, [0, 1, 2, 3]);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('leaving an unscrolled title releases its layout slot', (
+    tester,
+  ) async {
+    final scroll = ScrollController();
+    addTearDown(scroll.dispose);
+    late StateSetter select;
+    var index = 0;
+    await tester.pumpWidget(
+      host(
+        StatefulBuilder(
+          builder: (context, update) {
+            select = update;
+            return AppScaffold(
+              topBar: bar,
+              body: AppNavigationBody(
+                index: index,
+                children: [page(scroll), const Text('Dictionary')],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(amount(tester), 0);
+    select(() => index = 1);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('app-collapsed-title')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'large text and reduced motion keep actions reachable and '

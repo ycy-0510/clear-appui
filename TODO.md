@@ -346,3 +346,13 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] Strict analysis clean; all 71 AppUI checks pass, including nested hosts, orientation, large text, cancellation, keyboard and unchanged CI goldens.
 - [x] Upgrade BIOCAB's GitHub dependency and reinstall its matching Skill (recheck after any later compatibility commit).
 - [ ] Confirm actual phone Home-indicator/edge taps and home-logo transition; do not infer physical acceptance from widget checks.
+
+## Floating action capsule bounds — 2026-10-30
+
+- [x] Reproduced four clipped actions, inactive title slots and mismatched animated clipping (five failing cases before the fix).
+- [x] Give trailing actions their natural width before the compact title; retire inactive title slots after the actual fade, including an unscrolled header.
+- [x] Clip at the currently animated capsule boundary while preserving upstream button feedback, horizontal overflow scrolling and fixed touch targets.
+- [x] Add normal/narrow/RTL Widget Preview fixtures and matching shared Skill/design guidance.
+- [x] All 76 shared tests, unchanged CI goldens, strict analysis and Skill validation pass.
+- [ ] Physical verification of capsule bounds and transitions; the owner now requests real-device Debug/Hot Restart instead of Widget Preview. Preview compiler exited before interactive acceptance.
+- [ ] Upgrade the consumer Git dependency and Skill; physical dictionary/action verification remains separate.

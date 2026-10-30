@@ -4,6 +4,112 @@ import 'package:fossui/app_ui.dart';
 import 'package:fossui/app_ui_showcase.dart';
 import 'package:fossui_example/upstream_gallery.dart';
 
+/// Retained destinations, compact branding and two/four action transitions.
+@Preview(
+  name: 'Action capsule · 390',
+  group: 'AppUI / Navigation',
+  size: Size(390, 844),
+  wrapper: appPreviewWrapper,
+)
+Widget crowdedTopControls() => const _ToolbarPreview();
+
+/// The same shared controls at a smaller phone width.
+@Preview(
+  name: 'Action capsule · 320',
+  group: 'AppUI / Navigation',
+  size: Size(320, 844),
+  wrapper: appPreviewWrapper,
+)
+Widget crowdedTopControlsNarrow() => const _ToolbarPreview();
+
+/// Directional alignment and clipping during the same transitions.
+@Preview(
+  name: 'Action capsule · RTL',
+  group: 'AppUI / Navigation',
+  size: Size(390, 844),
+  wrapper: appPreviewWrapper,
+)
+Widget crowdedTopControlsRtl() => const Directionality(
+  textDirection: TextDirection.rtl,
+  child: _ToolbarPreview(),
+);
+
+class _ToolbarPreview extends StatefulWidget {
+  const _ToolbarPreview();
+
+  @override
+  State<_ToolbarPreview> createState() => _ToolbarPreviewState();
+}
+
+class _ToolbarPreviewState extends State<_ToolbarPreview> {
+  int index = 0;
+  int taps = 0;
+
+  @override
+  Widget build(BuildContext context) => AppTheme(
+    child: AppScaffold(
+      topBar: AppTopBar(
+        actions: [
+          for (var i = 0; i < (index == 0 ? 2 : 4); i++)
+            AppTopBarAction(
+              icon: SizedBox.square(
+                dimension: 20,
+                child: Center(child: Text(['↥', '+', '⌕', '⚙'][i])),
+              ),
+              label: 'Action ${i + 1}',
+              onPressed: () => setState(() => taps++),
+            ),
+        ],
+      ),
+      body: AppNavigationBody(
+        index: index,
+        children: [
+          _page(brand: true),
+          _page(brand: false),
+        ],
+      ),
+      navigation: AppNavigationBar(
+        selectedIndex: index,
+        onSelected: (value) => setState(() => index = value),
+        items: const [
+          AppNavigationItem(label: 'Home', icon: Text('A')),
+          AppNavigationItem(label: 'Dictionary', icon: Text('B')),
+        ],
+      ),
+    ),
+  );
+
+  Widget _page({required bool brand}) => Builder(
+    builder: (context) => ListView(
+      padding:
+          MediaQuery.paddingOf(context) +
+          context.appTheme.tokens.spacing.all(4),
+      children: [
+        if (brand)
+          const AppCollapsingTitle(
+            collapsed: AppText('Brand', role: AppTextRole.title),
+            child: SizedBox(
+              height: 100,
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: AppText('Brand', role: AppTextRole.display),
+              ),
+            ),
+          )
+        else
+          const AppText('Dictionary', role: AppTextRole.heading),
+        AppText('Action taps: $taps'),
+        const SizedBox(height: 16),
+        for (var i = 0; i < 12; i++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: AppCard(child: AppText('Item ${i + 1}')),
+          ),
+      ],
+    ),
+  );
+}
+
 /// Floating groups and a transparent-to-frosted scroll edge.
 @Preview(
   name: 'Floating top controls',

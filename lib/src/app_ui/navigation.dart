@@ -100,11 +100,11 @@ class AppTopBar extends StatelessWidget {
             ),
           ],
         ),
-        child: _animateChromeSize(
-          context,
-          alignment: AlignmentDirectional.centerEnd,
-          child: ClipRSuperellipse(
-            borderRadius: BorderRadius.circular(999),
+        child: ClipRSuperellipse(
+          borderRadius: BorderRadius.circular(999),
+          child: _animateChromeSize(
+            context,
+            alignment: AlignmentDirectional.centerEnd,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: IconTheme.merge(
@@ -131,78 +131,104 @@ class AppTopBar extends StatelessWidget {
     );
   }
 
+  Widget _title(BuildContext context, _CollapsedTitle title) => Padding(
+    padding: EdgeInsetsDirectional.only(
+      start: leading == null ? 0 : context.appTheme.tokens.spacing(3),
+    ),
+    child: SizedBox(
+      height: context.appTheme.dimensions.touchTarget,
+      child: ClipRect(
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(end: title.amount),
+          duration: context.appMotion(context.appTheme.motion.press),
+          builder: (context, amount, child) {
+            if (title.source == null && amount == 0) {
+              context
+                  .findAncestorStateOfType<_AppScaffoldState>()
+                  ?._retireInactiveTitle(title);
+            }
+            return IgnorePointer(
+              child: ExcludeFocus(
+                child: ExcludeSemantics(
+                  excluding: title.amount < .5,
+                  child: Opacity(
+                    key: const ValueKey('app-collapsed-title'),
+                    opacity: amount,
+                    alwaysIncludeSemantics: true,
+                    child: Transform.scale(
+                      scale: 1.15 - .15 * amount,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: child,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: title.child,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
   Widget _build(BuildContext context, _CollapsedTitle? title) => Padding(
     padding: EdgeInsets.symmetric(
       horizontal: context.appTheme.tokens.spacing(4),
       vertical: context.appTheme.tokens.spacing(2),
     ),
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         if (leading case final action?)
           _group(context, const ValueKey('app-top-leading'), [action]),
-        if (title != null)
+        if (title == null)
           Expanded(
-            child: Padding(
-              padding: EdgeInsetsDirectional.only(
-                start: leading == null ? 0 : context.appTheme.tokens.spacing(3),
-                end: context.appTheme.tokens.spacing(3),
-              ),
-              child: SizedBox(
-                height: context.appTheme.dimensions.touchTarget,
-                child: ClipRect(
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween(end: title.amount),
-                    duration: context.appMotion(context.appTheme.motion.press),
-                    builder: (context, amount, child) => IgnorePointer(
-                      child: ExcludeFocus(
-                        child: ExcludeSemantics(
-                          excluding: title.amount < .5,
-                          child: Opacity(
-                            key: const ValueKey('app-collapsed-title'),
-                            opacity: amount,
-                            alwaysIncludeSemantics: true,
-                            child: Transform.scale(
-                              scale: 1.15 - .15 * amount,
-                              alignment: AlignmentDirectional.centerStart,
-                              child: child,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    child: Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: AlignmentDirectional.centerStart,
-                        child: title.child,
-                      ),
-                    ),
-                  ),
+            child: Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Padding(
+                padding: EdgeInsetsDirectional.only(
+                  start: context.appTheme.tokens.spacing(3),
                 ),
-              ),
-            ),
-          ),
-        if (actions.isNotEmpty)
-          Flexible(
-            fit: title == null ? FlexFit.tight : FlexFit.loose,
-            child: Padding(
-              padding: EdgeInsetsDirectional.only(
-                start: context.appTheme.tokens.spacing(3),
-              ),
-              child: Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: _group(
-                  context,
-                  const ValueKey('app-top-trailing'),
-                  actions,
-                ),
+                child: actions.isEmpty
+                    ? const SizedBox.shrink()
+                    : _group(
+                        context,
+                        const ValueKey('app-top-trailing'),
+                        actions,
+                      ),
               ),
             ),
           )
-        else if (title == null)
-          const Spacer(),
+        else
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, limits) => Row(
+                children: [
+                  Expanded(child: _title(context, title)),
+                  if (actions.isNotEmpty)
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: limits.maxWidth),
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.only(
+                          start: context.appTheme.tokens.spacing(3),
+                        ),
+                        child: _group(
+                          context,
+                          const ValueKey('app-top-trailing'),
+                          actions,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
       ],
     ),
   );
@@ -331,8 +357,12 @@ class _AppScaffoldState extends State<AppScaffold> {
       final title = active.firstOrNull;
       final previous = _collapsedTitle.value;
       if (title == null || widget.topBar == null) {
-        if (previous != null && previous.amount != 0) {
-          _collapsedTitle.value = _CollapsedTitle(null, previous.child, 0);
+        if (previous != null) {
+          if (widget.topBar == null) {
+            _collapsedTitle.value = null;
+          } else if (previous.source != null) {
+            _collapsedTitle.value = _CollapsedTitle(null, previous.child, 0);
+          }
         }
         return;
       }
@@ -351,6 +381,16 @@ class _AppScaffoldState extends State<AppScaffold> {
       }
     });
     WidgetsBinding.instance.ensureVisualUpdate();
+  }
+
+  void _retireInactiveTitle(_CollapsedTitle title) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted &&
+          identical(_collapsedTitle.value, title) &&
+          title.source == null) {
+        _collapsedTitle.value = null;
+      }
+    });
   }
 
   void _setScrollOffset(double offset) {

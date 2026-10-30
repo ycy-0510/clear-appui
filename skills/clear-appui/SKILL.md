@@ -61,7 +61,12 @@ contract is an error: use the package's bundled skill rather than guessing.
   do not fork typography, spacing or navigation materials inside each app.
 - Use AppTopBar for top navigation: Back/Close has one floating leading surface;
   all trailing actions share one floating capsule. Keep titles in page content,
-  retain the library's grouped capsule surfaces. AppScaffold owns the top backdrop:
+  retain the library's grouped capsule surfaces. Trailing actions receive their
+  natural width before compact title content;
+  inactive title slots retire after fading. Keep the rounded clip outside size
+  animation so icons stay within the currently visible capsule. Verify three/four
+  actions during destination changes, narrow layouts and RTL. AppScaffold owns
+  the top backdrop:
   transparent at rest, progressively frosted when page content scrolls behind it.
   Do not implement per-screen blur or a separate tile for every trailing icon.
 - Use AppScaffold and AppNavigationBar for product page chrome. Preserve the

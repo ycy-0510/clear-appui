@@ -96,4 +96,52 @@ void main() {
     await tester.pump();
     expect(taps, 1);
   });
+
+  for (final direction in TextDirection.values) {
+    testWidgets('narrow actions scroll without covering Back in $direction', (
+      tester,
+    ) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        _host(
+          SizedBox(
+            width: 240,
+            child: AppTopBar(
+              leading: AppTopBarAction(
+                icon: const SizedBox.square(dimension: 20),
+                label: 'Back',
+                onPressed: () {},
+              ),
+              actions: [
+                for (var i = 0; i < 4; i++)
+                  AppTopBarAction(
+                    icon: const SizedBox.square(dimension: 20),
+                    label: 'Action $i',
+                    onPressed: () => taps++,
+                  ),
+              ],
+            ),
+          ),
+          direction: direction,
+        ),
+      );
+      final surface = find.byKey(const ValueKey('app-top-trailing'));
+      final back = tester.getRect(
+        find.byKey(const ValueKey('app-top-leading')),
+      );
+      expect(back.overlaps(tester.getRect(surface)), isFalse);
+      await tester.drag(
+        find.descendant(
+          of: surface,
+          matching: find.byType(SingleChildScrollView),
+        ),
+        Offset(direction == TextDirection.ltr ? -200 : 200, 0),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('app-top-action-Action 3')));
+      await tester.pumpAndSettle();
+      expect(taps, 1);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

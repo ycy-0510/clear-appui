@@ -50,6 +50,10 @@ Reduce Motion applies the scroll state directly. These values are product choice
 Trailing icons belong to one surface, not separate floating tiles.
 Each action retains its own accessible label, keyboard focus and touch target.
 When space is constrained, the trailing group scrolls instead of overlapping Back.
+Give the action group its natural width before fitting a compact title into the
+remaining space. Release an inactive title's layout slot after its fade finishes.
+Clip icons to the capsule's current animated outline, rather than the next size;
+verify three/four-action transitions as well as settled layouts.
 
 ```dart
 AppTopBar(

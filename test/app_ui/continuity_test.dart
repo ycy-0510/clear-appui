@@ -142,6 +142,13 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 70));
     final middle = tester.getSize(surface).width;
+    expect(
+      tester.getRect(
+        find.descendant(of: surface, matching: find.byType(ClipRSuperellipse)),
+      ),
+      tester.getRect(surface),
+      reason: 'The rounded clip must follow the animated visible capsule.',
+    );
     await tester.pumpAndSettle();
     final end = tester.getSize(surface).width;
     expect(middle, greaterThan(start));
