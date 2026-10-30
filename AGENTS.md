@@ -4,7 +4,7 @@
 - CPU 總使用率達 50% 時，不得啟動編譯、測試、預覽編譯或其他高 CPU 工作；可繼續閱讀和編輯。
 - 長時間工作須持續監控 CPU，保留餘裕並在高負載時暫停自己啟動的工作；不能只檢查啟動前一次。
 - 使用開發分支進行變更，每完成一段可驗證的功能即提交 checkpoint；未完成的驗證須明列，不得長期累積所有變更才 commit。
-- 開發元件優先使用 Flutter Widget Preview，原生功能與最後驗收才使用模擬器／實機。
+- 依使用者 2026-10-30 最新要求，UI 改用實體 iPhone 的 Debug、Hot Restart 與 Device Hub 驗證；不再啟動 Widget Preview 或模擬器。保留可注入相依性的自動測試。
 - 使用 `.fvmrc` 指定的 SDK；沒有 FVM 時，可使用完全相同版本的本機 Flutter。
 - `lib/src/app_ui/` 是產品 API；產品範例使用 `package:fossui/app_ui.dart`。
 - 保留上游 `Foss*` API、授權、NOTICE、字體授權及既有測試，避免不必要的改名。

@@ -355,4 +355,5 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] Add normal/narrow/RTL Widget Preview fixtures and matching shared Skill/design guidance.
 - [x] All 76 shared tests, unchanged CI goldens, strict analysis and Skill validation pass.
 - [ ] Physical verification of capsule bounds and transitions; the owner now requests real-device Debug/Hot Restart instead of Widget Preview. Preview compiler exited before interactive acceptance.
-- [ ] Upgrade the consumer Git dependency and Skill; physical dictionary/action verification remains separate.
+- [x] BIOCAB adopts Git 0a1515c and its matching NPX-installed Skill; doctor and all 124 consumer checks pass, including retained home/dictionary chrome.
+- [ ] Physical dictionary/action verification remains pending; Device Hub connects to the phone but current source is not installed.
