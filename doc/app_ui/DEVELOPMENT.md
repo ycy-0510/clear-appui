@@ -128,7 +128,7 @@ inset without doubled header/footer padding.
 
 ## Resource limits and validation
 
-The CPU guard refuses new compilation, tests or preview startup above 60% total
+The CPU guard refuses new compilation, tests or preview startup at 50% total
 host CPU utilization. Do not run test/analyzer/preview compilers simultaneously.
 At most one simulator may run, and only with the newest installed iOS runtime.
 No simulator is needed for the preview or widget tests.

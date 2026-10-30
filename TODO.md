@@ -320,3 +320,8 @@ Preview hot restart 2,782ms 成功；SDK 在 restart 時出現 disposed EngineFl
 - [x] 返回、Escape、背景取消、保存錯誤重試、等待期間路由移除測試通過。
 - [x] 共用 Skill 與設計文件更新；105 項 AppUI／上游 list tile（含既有 CI Golden）回歸及嚴格分析通過。
 - [ ] 消費端外部 PDF 輸入、掃描恢復及實機驗收另行記錄，不以 host 測試代替。
+
+## CPU 開發限制（2026-10-30）
+
+- [x] 依使用者最新要求，將 CPU 啟動門檻改為 50%；同步本專案與 BIOCAB 的檢查腳本及開發指引。
+- [ ] 長時間編譯期間仍須留意負載；不可僅以啟動時低於門檻推定全程符合。
